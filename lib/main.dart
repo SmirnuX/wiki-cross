@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'Proto WikiCross',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        primaryColor: Colors.tealAccent[100],
       ),
       home: const MyHomePage(title: 'Proto WikiCross'),
     );
@@ -39,27 +41,75 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: _WordHor(
-        ),
+      body: InteractiveViewer(
+        minScale: 0.5,
+        maxScale: 4.0,
+        boundaryMargin: const EdgeInsets.all(200),
+        constrained: false,
+        //clipBehavior: Clip.none,
+        child: Container(
+          width: 1520,
+          height: 640,
+          child: Stack(
+            //clipBehavior: Clip.none,
+            children: <Widget>[
+              Positioned(child: _WordHor(length : 10), top: 80, left: 80),      
+              Positioned(child: _WordHor(length : 16), top: 240, left: 240), 
+              Positioned(child: _WordVer(length : 8), top: 0, left: 160),
+            ]),
+        ) 
       ),
     );
   }
 }
 
 class _WordHor extends StatelessWidget {
+  const _WordHor ({ Key? key, this.length: 8 }) : super(key: key);
+  final length;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <_CellCross>[
-        _CellCross(),
-        _CellCross(),
-        _CellCross(),
-        _CellCross(),
-        _CellCross(),
-      ]
+    return Container(child: Row(
+        children: List <_CellCross>.filled(length, _CellCross()),
+      ),
     );
   }
+}
+
+class _WordVer extends StatelessWidget {
+  const _WordVer({ Key? key, this.length: 8 }) : super(key: key);
+  final length;
+  @override
+  Widget build(BuildContext context) {
+    return Container(child: Column(
+        children: List <_CellCross>.filled(length, _CellCross()),
+      ),
+    );
+  }
+}
+
+class _CellFormatter extends TextInputFormatter {  //Форматирование текста в ячейках
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue
+      ) {
+        if (!newValue.text.contains(RegExp(r"^[A-ZА-ЯЁ]+$"))) //Посторонние символы
+        {
+          return TextEditingValue.empty;  //Сброс ячейки
+        }
+        if (newValue.text.length <= 1)
+        {
+          return newValue;
+        }
+        if (newValue.text.substring(1) == oldValue.text)  //Если новая буква вначале
+        {
+          return TextEditingValue(text:newValue.text.substring(0,1)); //Возвращаем первую букву
+        }
+        else
+        {
+          return TextEditingValue(text:newValue.text.substring(1));
+        }
+      }
 }
 
 class _CellCross extends StatefulWidget { //Ячейка кроссворда
@@ -74,6 +124,7 @@ class __CellCrossState extends State<_CellCross> {
   final _biggerFont = TextStyle(fontSize: 40);
   bool _focused = false;
   late FocusNode myFocusNode;
+  _CellFormatter txt_format = _CellFormatter();
   var txt = TextEditingController();
   @override
   void initState()
@@ -87,13 +138,6 @@ class __CellCrossState extends State<_CellCross> {
           });
         }
       });
-    });
-    txt.addListener(() {
-      txt.value = txt.value.copyWith(
-        selection:
-            TextSelection(baseOffset: txt.value.text.length, extentOffset: txt.value.text.length),
-        composing: TextRange.empty,
-      );
     });
   }
 
@@ -112,6 +156,8 @@ class __CellCrossState extends State<_CellCross> {
         color: _focused?sel_color:for_color,
         child: Center(
           child: TextField(
+            autocorrect: false,
+            enableSuggestions: false,
             cursorColor: _focused?sel_color:for_color,
             showCursor: false,
             focusNode: myFocusNode,
@@ -122,16 +168,19 @@ class __CellCrossState extends State<_CellCross> {
             textAlign: TextAlign.center,
             maxLength: 2, //Extra character for next symbol
             onChanged: (String value) {
-              value = value.toUpperCase();
-              if (!value.contains(RegExp(r"^[A-ZА-ЯЁ]+$"))) {
-                txt.text = '';
-              } else if (value.length == 2) {
-                txt.text = value.substring(1);
-              } else {
-                txt.text = value;
-              }
+            //   value = value.toUpperCase();
+            //   if (!value.contains(RegExp(r"^[A-ZА-ЯЁ]+$"))) {
+            //     txt.text = '';
+            //   } else if (value.length == 2) {
+            //     txt.text = value.substring(1);
+            //   } else {
+            //     txt.text = value;
+            //   }
               myFocusNode.nextFocus();
-            }
+            },
+            inputFormatters: [
+              txt_format,
+            ],
           ),
         ) 
       )
