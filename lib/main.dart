@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Proto WikiCross', //TODO - change version
+      title: 'Proto WikiCross',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
