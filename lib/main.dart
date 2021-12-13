@@ -42,9 +42,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: InteractiveViewer(
-        minScale: 0.5,
-        maxScale: 4.0,
-        boundaryMargin: const EdgeInsets.all(200),
+        minScale: 0.001,
+        maxScale: 8.0,
+        boundaryMargin: const EdgeInsets.all(1520), //ax(w,h)
         constrained: false,
         //clipBehavior: Clip.none,
         child: Container(
@@ -93,21 +93,21 @@ class _CellFormatter extends TextInputFormatter {  //Форматировани�
       TextEditingValue oldValue,
       TextEditingValue newValue
       ) {
-        if (!newValue.text.contains(RegExp(r"^[A-ZА-ЯЁ]+$"))) //Посторонние символы
+        if (newValue.text.contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]"))) //Посторонние символы
         {
-          return TextEditingValue.empty;  //Сброс ячейки
+          return TextEditingValue();  //Сброс ячейки
         }
         if (newValue.text.length <= 1)
         {
-          return newValue;
+          return TextEditingValue(text:newValue.text.toUpperCase());
         }
         if (newValue.text.substring(1) == oldValue.text)  //Если новая буква вначале
         {
-          return TextEditingValue(text:newValue.text.substring(0,1)); //Возвращаем первую букву
+          return TextEditingValue(text:newValue.text.substring(0,1).toUpperCase()); //Возвращаем первую букву
         }
         else
         {
-          return TextEditingValue(text:newValue.text.substring(1));
+          return TextEditingValue(text:newValue.text.substring(1).toUpperCase());
         }
       }
 }
@@ -153,36 +153,38 @@ class __CellCrossState extends State<_CellCross> {
       width: 80,
       height: 80,
       child: Card(
-        color: _focused?sel_color:for_color,
-        child: Center(
-          child: TextField(
-            autocorrect: false,
-            enableSuggestions: false,
-            cursorColor: _focused?sel_color:for_color,
-            showCursor: false,
-            focusNode: myFocusNode,
-            textInputAction: TextInputAction.next,
-            controller: txt,
-            decoration: null,
-            style: _biggerFont,
-            textAlign: TextAlign.center,
-            maxLength: 2, //Extra character for next symbol
-            onChanged: (String value) {
-            //   value = value.toUpperCase();
-            //   if (!value.contains(RegExp(r"^[A-ZА-ЯЁ]+$"))) {
-            //     txt.text = '';
-            //   } else if (value.length == 2) {
-            //     txt.text = value.substring(1);
-            //   } else {
-            //     txt.text = value;
-            //   }
-              myFocusNode.nextFocus();
-            },
-            inputFormatters: [
-              txt_format,
-            ],
-          ),
-        ) 
+        color: _focused?sel_color:for_color,  
+        child: InkWell(
+          onTap: () {
+            myFocusNode.requestFocus();
+          },
+          child: Center(
+            child: TextField(
+              autocorrect: false,
+              enableSuggestions: false,
+              enableIMEPersonalizedLearning: false,
+              onTap: () {
+                myFocusNode.requestFocus();
+              },
+              cursorColor: _focused?sel_color:for_color,
+              showCursor: false,
+              focusNode: myFocusNode,
+              textInputAction: TextInputAction.next,
+              controller: txt,
+              decoration: null,
+              style: _biggerFont,
+              textAlign: TextAlign.center,
+              maxLength: 2, //Extra character for next symbol
+              onChanged: (String value) {
+                myFocusNode.nextFocus();
+              },
+              inputFormatters: [
+                txt_format,
+              ],
+            ),
+          ) 
+        )
+        
       )
     );
   }
