@@ -66,7 +66,7 @@ class __CellCrossState extends State<CellCross> {
   final for_color = Colors.white;
   final sel_color = Colors.green[50];
   final _biggerFont = TextStyle(fontSize: 40);
-  final _transparentFont = TextStyle(fontSize: 40, color: Colors.grey[100]);
+  final _transparentFont = TextStyle(fontSize: 40, color: Colors.grey[600]);
 
 
   bool _focused = false;
