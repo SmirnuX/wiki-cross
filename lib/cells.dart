@@ -11,15 +11,16 @@ import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 
 class WordHor extends StatelessWidget {
-  const WordHor ({ Key? key, this.length: 8 }) : super(key: key);
-  final length;
+  const WordHor ({ Key? key, required this.length, required this.word }) : super(key: key);
+  final int length;
+  final String word;
   @override
   Widget build(BuildContext context) {
     //Сбор слова
     var Cells = <CellCross>[];
     for (int i = 0; i < length; i++)
     {
-      Cells.add(CellCross(last: i == length-1?true:false));
+      Cells.add(CellCross(last: i == length-1?true:false, letter: word.substring(i, i+1),));
     }
     return Container(
       child: FocusTraversalGroup(
@@ -32,15 +33,16 @@ class WordHor extends StatelessWidget {
 }
 
 class WordVer extends StatelessWidget {
-  const WordVer({ Key? key, this.length: 8 }) : super(key: key);
-  final length;
+  const WordVer({ Key? key, required this.length, required this.word }) : super(key: key);
+  final int length;
+  final String word;
   @override
   Widget build(BuildContext context) {
     //Сбор слова
     var Cells = <CellCross>[];
     for (int i = 0; i < length; i++)
     {
-      Cells.add(CellCross(last: i == length-1?true:false));
+      Cells.add(CellCross(last: i == length-1?true:false, letter: word.substring(i, i+1),));
     }
     return Container(
       child: FocusTraversalGroup(
