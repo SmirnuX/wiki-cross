@@ -328,14 +328,16 @@ class Gen_Crossword {
       bool is_created = false;
       for (var inters in field.intersec)
       {
-        // if (i == inters.index)
-        // {
-        //   Cells.add(TransparentCell(
-        //     last: i == field.length-1?true:false, 
-        //     clone: other[inters.source_index].focus_nodes[inters.source])
-        //   );
-        //   is_created = true;
-        // }
+        if (i == inters.index)
+        {
+          Cells.add(TransparentCell(
+            last: i == field.length-1?true:false, 
+            clone: other[inters.source],
+            source: inters.source_index,
+            letter: field.word.substring(i, i+1),
+          ));
+          is_created = true;
+        }
       }
       if (!is_created)
       {
@@ -355,17 +357,9 @@ class Gen_Crossword {
         }
       }
     }
-    //Выбор горизонтального или вертикального слова
-    if (field.hor)
-    {
-      Word_container = Row(children: Cells,);
-    }
-    else
-    {
-      Word_container = Column(children: Cells,);
-    }
     return Words (
-      WordContainer: Word_container,
+      hor: field.hor,
+      children: Cells,
     );
   }
 }
