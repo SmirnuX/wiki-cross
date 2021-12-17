@@ -2,6 +2,8 @@
 WordHor - горизонтальное слово
 WordVer - вертикальное слово
 CellCross - ячейка кроссворда
+TransparentCell - прозрачная ячейка кроссворда, для случаев пересечения
+ReadOnlyCell - ячейка с неизменяемым содержимым, для случаев посторонних символов
 _CellFormatter - контроллер ввода для ячеек
 */
 import 'dart:ui';
@@ -10,24 +12,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 
-class WordHor extends StatelessWidget {
-  const WordHor ({ Key? key, required this.length, required this.word }) : super(key: key);
-  final int length;
-  final String word;
+
+
+class Words extends StatelessWidget {
+  Words ({ Key? key, required this.WordContainer}) : super(key: key);
+  var focus_nodes = <FocusNode>[];
+  Widget WordContainer;
   @override
   Widget build(BuildContext context) {
-    //Сбор слова
-    var Cells = <CellCross>[];
-    for (int i = 0; i < length; i++)
-    {
-      Cells.add(CellCross(last: i == length-1?true:false, letter: word.substring(i, i+1),));
-    }
-    return Container(
-      child: FocusTraversalGroup(
-        child: Row(
-          children: Cells,
-        ),
-      ),
+    return FocusTraversalGroup(
+      child: WordContainer,
     );
   }
 }
@@ -209,4 +203,129 @@ class _CellFormatter extends TextInputFormatter {  //Форматировани�
           return TextEditingValue(text:newValue.text.substring(1).toUpperCase());
         }
       }
+}
+
+//TransparentCell - прозрачная ячейка кроссворда, для случаев пересечения
+class TransparentCell extends StatefulWidget { //Ячейка кроссворда
+  TransparentCell({ Key? key, required this.last, required this.clone}) : super(key: key);
+  final bool last; //Является ли данная ячейка последней?
+  //final String letter;  //Буква на этом месте
+  final FocusNode clone;
+  @override
+  __TransparentCellState createState() => __TransparentCellState();
+}
+
+class __TransparentCellState extends State<TransparentCell> {
+  bool _focused = false;
+  FocusNode myFocusNode = FocusNode();
+  @override
+  void initState()
+  {
+    myFocusNode.addListener(() { 
+      if (myFocusNode.hasFocus) {
+        widget.clone.requestFocus();  //Передача фокуса оригинальной ячейке
+      }
+    });
+  }
+
+  @override
+  void dispose()
+  {
+    myFocusNode.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 80,
+      height: 80,
+      child: Opacity(
+        opacity: 0.0,
+        child: InkWell(
+          // onTap: () {
+          //   myFocusNode.requestFocus();
+          // },
+          onFocusChange: (bool f) {
+            if (f) {
+              widget.clone.requestFocus();
+            }
+          },
+        )       
+      )
+    );
+  }
+}
+
+// ReadOnlyCell - ячейка с неизменяемым содержимым, для случаев посторонних символов
+class ReadOnlyCell extends StatefulWidget { //Ячейка кроссворда
+  ReadOnlyCell({ Key? key, required this.last, this.letter:'A'}) : super(key: key);
+  final bool last; //Является ли данная ячейка последней?
+  final String letter;  //Буква на этом месте
+  @override
+  __ReadOnlyCellState createState() => __ReadOnlyCellState();
+}
+
+class __ReadOnlyCellState extends State<ReadOnlyCell> {
+  final for_color = Colors.grey[200];
+  final _biggerFont = TextStyle(fontSize: 40);
+  bool _focused = false;
+  FocusNode myFocusNode = FocusNode();
+
+  @override
+  void initState()
+  {
+    myFocusNode.addListener(() { 
+      setState(() {
+        if (myFocusNode.hasFocus != _focused) {
+          setState(() {
+            if (widget.last)
+            {
+              myFocusNode.unfocus();
+            }
+            else
+            {
+              myFocusNode.nextFocus();
+            }
+          });
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose()
+  {
+    myFocusNode.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 80,
+      height: 80,
+      child: Card(
+        color: for_color, 
+        child: InkWell(
+          onFocusChange: (bool f) {
+            if (f) {
+              if (widget.last)
+              {
+                myFocusNode.unfocus();
+              }
+              else
+              {
+                myFocusNode.nextFocus();
+              }
+            }
+          },
+          child: Center(
+            child: Text(
+              widget.letter,
+              style: _biggerFont,
+            ),
+          )    
+        ) 
+      )
+    );
+  }
 }

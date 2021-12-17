@@ -54,25 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Widgets,
-      
-      // InteractiveViewer(
-      //   minScale: 0.001,
-      //   maxScale: 8.0,
-      //   boundaryMargin: const EdgeInsets.all(1520), //ax(w,h)
-      //   constrained: false,
-      //   //clipBehavior: Clip.none,
-      //   child: SizedBox(
-      //     width: 1520,
-      //     height: 640,
-      //     child: Stack(
-      //       //clipBehavior: Clip.none,
-      //       children: const <Widget>[
-      //         Positioned(child: WordHor(length : 10), top: 80, left: 80),      
-      //         Positioned(child: WordHor(length : 16), top: 240, left: 240), 
-      //         Positioned(child: WordVer(length : 8), top: 0, left: 160),
-      //       ]),
-      //   ) 
-      // ),
     );
   }
 }
