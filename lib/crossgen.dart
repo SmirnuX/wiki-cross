@@ -364,11 +364,10 @@ class Gen_Crossword {
   }
 }
 
-class Gen_Word {  //Одно слово, использующееся в генерации кроссворда
+class Gen_Word {  //Структура для хранения слов, используемых в генерации кроссворда
   Gen_Word ({required this.word, required this.weight});
   double weight = 0;  //Вес слова
   String word;
-  
 }
 
 class Field_Word {  //Слово на поле
