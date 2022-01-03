@@ -1,51 +1,42 @@
-/* Генерация непосредственно кроссвордов
+//Генерация кроссворда
+// ignore_for_file: camel_case_types, non_constant_identifier_names
 
-
-*/
 import 'cells.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'main.dart';
 
 class Math {
-  static bool interserct(int a, int b, int c, int d)
+  static bool interserct(int a, int b, int c, int d)  //Пересекаются ли отрезки a-c и b-d
   {
-    if (max(a, b) <= min (c, d))
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (max(a, b) <= min (c, d));
+  }
+  static bool between(int a, int b, int c)  //Находится ли b в промежутке от a (вкл) до c (искл)
+  {
+    return a <= b && b < c;
   }
 }
 
-class Intersection {
-  Intersection({required this.index, required this.source, required this.source_index});
-  int source_index; //Точка пересечения на оригинальной ячейке
-  int source; //Номер слова, содержащего оригинальную ячейку
-  int index;  //Точка пересечения на покрывающей ячейке
-}
-
-class Gen_Crossword {
+class Gen_Crossword { //Сгенерированный кроссворд
   var field_words = <Field_Word>[]; //Непосредственно слова, расставленные по полю
   int width = 0, height = 0;  //Ширина и высота поля
+  int word_count = 0; //Количество слов в кроссворде
 
-  Gen_Crossword(List <String> words) {
+  Gen_Crossword(List <Gen_Word> words, int target) {  //Генерация кроссворда по списку слов words с целевой длиной в target cлов
     //Подсчет вхождений каждой буквы
-    String letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯ';
+    const String letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯ';
+    target = target>words.length?words.length:target;
     var let_count = List<int>.filled(59, 0);
     int all_count = 0;
     for (int i = 0; i < words.length; i++)
     {
-      words[i] = words[i].toUpperCase();
+      words[i].word = words[i].word.toUpperCase();
     }
-    for(var word in words)
+    for(var word in words)  //Подсчет количества букв
     {
-      //var symbols = Runes(word);
-      for (int i = 0; i < word.length; i++)
+      for (int i = 0; i < word.word.length; i++)
       {
-        var ind = letters.indexOf(word.substring(i,i+1));
+        var ind = letters.indexOf(word.word.substring(i,i+1));
         if (ind > -1 && ind < 60)
         {
           let_count[ind]++;
@@ -53,38 +44,39 @@ class Gen_Crossword {
         }
       }
     }
-    //Создание списка
-    var gen_words = <Gen_Word>[];
-    for(var word in words)
+    for(var word in words)  //Подсчет весов
     {
       double weight = 0;
-      for (int i = 0; i < word.length; i++)
+      for (int i = 0; i < word.word.length; i++)
       {
-        var ind = letters.indexOf(word.substring(i,i+1));
+        var ind = letters.indexOf(word.word.substring(i,i+1));
         if (ind != -1)
         {
           weight += let_count[ind].toDouble() / all_count.toDouble();
         }
       }
-      var new_gen_word = Gen_Word(word: word, weight: weight);
-      gen_words.add(new_gen_word);
+      word.weight = weight;
     }
     //Сортиров очка
-    gen_words.sort((a,b) => b.weight.compareTo(a.weight));
+    words.sort((a,b) => b.weight.compareTo(a.weight));
     //1. Выбираем случайно одно из первого буфера слов
     Random rng = Random();
     int buffer = 5;
     int ind = rng.nextInt(buffer);
     bool first_hor = rng.nextBool();
-    field_words.add(Field_Word(hor: first_hor, word: gen_words[ind].word, x: 0, y: 0, ));
-    int min_x = 0, min_y = 0, max_x = first_hor?gen_words[ind].word.length:1, max_y = !first_hor?gen_words[ind].word.length:1;
-    gen_words.removeAt(ind);
+    field_words.add(Field_Word(hor: first_hor, word: words[ind].word, x: 0, y: 0, num: 0, definition:words[ind].definition));
+    int min_x = 0, min_y = 0, max_x = first_hor?words[ind].word.length:1, max_y = !first_hor?words[ind].word.length:1;
+    words.removeAt(ind);
     //2. Постепенный выбор новых слов и попытка их вставить в кроссворд
     bool dead_end = false;
     int target_words = 10;
     while (!dead_end && field_words.length < target_words)
     {
-      buffer = buffer < gen_words.length ? buffer + 1 : gen_words.length; 
+      buffer = buffer < words.length ? buffer + 1 : words.length; 
+      if (words.isEmpty)
+      {
+        break;
+      }
       //Выбор нового слова
       ind = rng.nextInt(buffer);
       //Попытка это слово вставить
@@ -92,25 +84,28 @@ class Gen_Crossword {
       for (var fword in field_words)
       {
         //Поиск пересечений
-        for (int i = 0; i < gen_words[ind].word.length; i++)
+        for (int i = 0; i < words[ind].word.length; i++)
         {
           int lastFound = 0;
-          lastFound = fword.word.indexOf(gen_words[ind].word.substring(i, i+1), lastFound);
+          lastFound = fword.word.indexOf(words[ind].word.substring(i, i+1), lastFound);
           if (lastFound == -1)
           {
             continue;
           }
           else
           {
-            if (CheckPlacement(gen_words[ind].word, //Проверка, можно ли расположить строку здесь
+            if (CheckPlacement(words[ind].word, //Проверка, можно ли расположить строку здесь
               fword.hor? fword.x + lastFound : fword.x - i, 
               fword.hor? fword.y - i : fword.y + lastFound, !fword.hor))
             {
+              int new_ind = field_words.length;
               field_words.add(Field_Word(
                 hor: !fword.hor, 
-                word: gen_words[ind].word, 
+                word: words[ind].word, 
                 x: fword.hor? fword.x + lastFound : fword.x - i, 
-                y: fword.hor? fword.y - i : fword.y + lastFound,));
+                y: fword.hor? fword.y - i : fword.y + lastFound,
+                num: new_ind,
+                definition: words[ind].definition));
               //!Добавление пересечений
               GetIntersections(field_words.length-1);
               if (fword.hor)
@@ -123,7 +118,7 @@ class Gen_Crossword {
                 min_x = min(min_x, field_words.last.x);
                 max_x = max(max_x, field_words.last.x + field_words.last.length);
               }
-              gen_words.removeAt(ind);
+              words.removeAt(ind);
               word_added = true;
               break;
             }
@@ -151,7 +146,7 @@ class Gen_Crossword {
     height = (max_y - min_y) * 80;
   }
   
-  bool CheckPlacement(String word, int x, int y, bool hor)
+  bool CheckPlacement(String word, int x, int y, bool hor)  //Проверка расположения слова по указанным координатам
   {
     for (var ex_word in field_words)
     {
@@ -249,7 +244,7 @@ class Gen_Crossword {
     return true;
   }
 
-  void GetIntersections(int index)
+  void GetIntersections(int index)  //Поиск пересечений
   {
     for (int i = 0; i < field_words.length; i++)
     {
@@ -290,7 +285,7 @@ class Gen_Crossword {
 
   Widget ToWidgets()  //Неопсредственно сборка кроссворда
   {
-    var word_inputs = <Words>[];
+    var word_inputs = <Word>[];
     var positioned_words = <Positioned>[];
     for (var Field in field_words)
     {
@@ -317,7 +312,7 @@ class Gen_Crossword {
       );
   }
 
-  Words CreateWord(Field_Word field, List<Words> other)
+  Word CreateWord(Field_Word field, List<Word> other) //Добавление нового слова
   {
     Widget Word_container;
     //Наполнение слова
@@ -357,29 +352,80 @@ class Gen_Crossword {
         }
       }
     }
-    return Words (
+    var result = Word (
+      index: other.length,
       hor: field.hor,
       children: Cells,
+      parent: field,     
     );
+    return result;
+  }
+
+  List <Field_Word> GetWordList() //Получение списка слов
+  {
+    return field_words;
   }
 }
 
 class Gen_Word {  //Структура для хранения слов, используемых в генерации кроссворда
-  Gen_Word ({required this.word, required this.weight});
+  Gen_Word ({required this.word, required this.weight, this.definition = ''});
   double weight = 0;  //Вес слова
-  String word;
+  String word;  //Непосредственно само слово
+  String definition;  //Определение слова
 }
 
-class Field_Word {  //Слово на поле
-  Field_Word({required this.word, required this.hor, required this.x, required this.y})
+class Field_Word {  //Слово, расположенное на поле
+  Field_Word({required this.word, required this.hor, required this.x, required this.y, required this.num,
+              required this.definition})
   {
     length = word.length;
     intersec = <Intersection>[];
+    in_word = '';
+    for (int i = 0; i < length; i++)
+    {
+      if (word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))
+      {
+        in_word += word.substring(i, i+1);  //Добавление посторонних символов
+      }
+      else
+      {
+        in_word += '_'; //Еще не введенные символы
+      }
+    }
   }
-  String word;  //Непосредственно слово
+
+  void UpdateHighlight(int h)
+  {
+    highlighted = h;
+    if (h != -1)
+    {
+      parent.chosen = num;
+    }
+    else
+    {
+      if (parent.chosen == num)
+      {
+        parent.chosen = -1;
+      }
+    }
+    //parent.update();
+  }
+
+  int highlighted = -1; //Индекс подсвеченной ячейки (-1 если ни одна не подсвечена)
+  String word;  //Непосредственно само слово
+  late String in_word; //Введенное слово
+  String definition;  //Определение этого слова
   int x, y;   //Координаты начала слова
+  int num;  //Номер слова
   late int length; //Длина слова
   bool hor; //Горизонтально ли расположено слово
   late List <Intersection> intersec; //Массив, указывающий, какие ячейки являются пересечениями
+  late MyHomePage parent;
 }
 
+class Intersection {  //Класс для обозначения пересечений
+  Intersection({required this.index, required this.source, required this.source_index});
+  int source_index; //Индекс места пересечения на оригинальном слове
+  int source; //Индекс оригинального слова
+  int index;  //Индекс места пересечения на перекрывающем слове
+}

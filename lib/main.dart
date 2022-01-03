@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:ffi';
 import 'dart:ui';
 
@@ -8,6 +10,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'dart:io' show Platform;
 import 'cells.dart';
 import 'crossgen.dart';
+import 'test_words.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,90 +28,119 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         primaryColor: Colors.tealAccent[100],
       ),
-      home: const MyHomePage(title: 'Proto WikiCross'),
+      home: MyHomePage(title: 'Proto WikiCross'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
+  MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
-
+  int chosen = -1;  //Выбранное слово
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List <Field_Word> Words = [];
+  late Gen_Crossword crossword;
+  @override
+  void initState()
+  {
+    crossword = Gen_Crossword(test_words_set.Get(), 10);
+    Words = crossword.GetWordList();
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    var Gen = Gen_Crossword(<String> [
-        'Привет', 'Пока', 'Наследование', 'Кто-то', 'Какие-то', 'Санкт-Петербург', 'о\'ооо', 'город', 'солнце',
-        'поезд', 'окружение', 'ПрИзнание', 'Песок', 'Кровля', 'Пельмени', 'Дровяные', 'Конструкции', 'Москва',
-        'Flutter', 'Is', 'The', 'Best', 'Framework', 'const', 'var', 'main', 'O\'Reilly',
-        'привествую', 'ну', 'че', 'как', 'что', 'устал', 'уже', 'очень', 'cisco',
-    ]);
-    var Widgets = Gen.ToWidgets();
+    for (var word in Words)
+    {
+      word.parent = widget;
+    }
+    var Widgets = crossword.ToWidgets();
+    var def = Definition(source: widget.chosen == -1?null:Words[widget.chosen]);
     return Scaffold(
-      bottomSheet: Definition(),
+      bottomSheet: def,
       body: Widgets,
     );
   }
 }
 
-class Definition extends StatelessWidget {
-  Definition({ Key? key }) : super(key: key);
-  final TextStyle Header_style = TextStyle(
+class Definition extends StatefulWidget {
+  Definition({ Key? key, this.source}) : super(key: key);
+  Field_Word? source;
+  final TextStyle Header_style = const TextStyle(
     fontSize: 30,
     fontFamily: 'Arial'
   );
-  final TextStyle Definit_style = TextStyle(
+  final TextStyle Definit_style = const TextStyle(
     fontSize: 20
   );
-  final Counter_style = TextStyle(
-    color: Colors.grey[400],
+  final Counter_style = const TextStyle(
+    color: Colors.black,
     fontSize: 18,
   );
 
+  @override
+  _DefinitionState createState() => _DefinitionState();
+}
+
+class _DefinitionState extends State<Definition> {
 
   @override
   Widget build(BuildContext context) {
+    String result = '';
+    if (widget.source != null)
+    {
+      for (int i = 0; i < widget.source!.length; i++)
+      {
+        if (widget.source!.word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
+        {
+          result += widget.source!.word.substring(i, i+1);
+        }
+        else
+        {
+          String letter = widget.source!.in_word.substring(i, i+1);
+          result += letter==' '?'_':letter;
+        }
+        result += ' ';
+      }
+    }
     return Card(
-      margin: EdgeInsets.all(4),
+      margin: const EdgeInsets.all(4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: EdgeInsets.fromLTRB(15, 10, 15, 5),
+            margin: const EdgeInsets.fromLTRB(15, 10, 15, 5),
             child: Chip( 
               label:Text(
-                '1/12',
-                style: Counter_style,
+                (widget.source==null)?'':'${widget.source!.num+1}/10',
+                style: widget.Counter_style,
               )
             )
           ),
           Container(
             child: AutoSizeText (
-              'П _ _ Ь М _ _ И',
+              result,
               maxFontSize: 30,
               maxLines: 1,
               wrapWords: false,
               textAlign: TextAlign.left,
-              style: Header_style,
+              style: widget.Header_style,
             ),
-            margin: EdgeInsets.fromLTRB(15, 5, 15, 5),
+            margin: const EdgeInsets.fromLTRB(15, 5, 15, 5),
           ),
-          Divider(
+          const Divider(
           ),
           Container(
             child:Text(
-              'традиционное блюдо русской кухни в виде термически обработанных изделий из пресного теста с начинкой из рубленого мяса или рыбы, ведущее своё происхождение с Урала и Сибири.',
-              style: Definit_style,
+              (widget.source==null)?'':widget.source!.definition,
+              style: widget.Definit_style,
             ),
-            margin:EdgeInsets.all(10),
+            margin: const EdgeInsets.all(10),
           ),
         ]
       )  

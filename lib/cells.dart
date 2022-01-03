@@ -1,17 +1,18 @@
-/* Включает в себя следующие классы:
-CellCross - ячейка кроссворда
-TransparentCell - прозрачная ячейка кроссворда, для случаев пересечения
-ReadOnlyCell - ячейка с неизменяемым содержимым, для случаев посторонних символов
-_CellFormatter - контроллер ввода для ячеек
-*/
+// Ячейки, слова из ячеек и их форматирование
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 
-class Words extends StatelessWidget {
-  Words ({ Key? key, required this.hor, required this.children}) : super(key: key);
-  var children = <Widget>[];
-  bool hor;
+import 'package:wiki_cross/crossgen.dart';
+
+class Word extends StatelessWidget {
+  const Word ({ Key? key, required this.hor, required this.children, required this.parent, required this.index}) : super(key: key);
+  final List<Widget> children;
+  final Field_Word parent;
+  final int index;
+  final bool hor;
   @override
   Widget build(BuildContext context) {
     Widget WordContainer;
@@ -28,14 +29,14 @@ class Words extends StatelessWidget {
     );
   }
 
-  void ChangeLetter(String let, int index)
+  void ChangeLetter(String let, int index)  //Изменить букву под номером index на let
   {
     dynamic child = children[index];
     if (child.runtimeType == CellCross)
     {
       try
       {
-      child.setText(let);
+        child.setText(let);
       }
       on NoSuchMethodError 
       {
@@ -43,16 +44,18 @@ class Words extends StatelessWidget {
         return;
       }
     }
+    parent.in_word.replaceRange(index, index+1, let);
   }
   
-  void ChangeFocus(bool value, int index)
+  void ChangeFocus(bool value, int index) //Подсветить ячейку под номером index
   {
     dynamic child = children[index];
     if (child.runtimeType == CellCross)
     {
       try
       {
-      child.setHighlighted(value);
+        child.setHighlighted(value);
+        parent.UpdateHighlight(value?index:-1);
       }
       on NoSuchMethodError 
       {
@@ -60,6 +63,7 @@ class Words extends StatelessWidget {
         return;
       }
     }
+    parent.highlighted = value?index:-1;
   }
 }
 
@@ -181,8 +185,8 @@ class TransparentCell extends StatefulWidget { //Ячейка кроссворд
   TransparentCell({ Key? key, required this.last, this.letter:'A', required this.clone, required this.source}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
   final String letter;  //Буква на этом месте
-  final Words clone;
-  final int source;
+  final Word clone; //Оригинальное слово, на букву которого наслаивается данная ячейка
+  final int source; //Индекс пересечения в оригинальном слове
   @override
   __TransparentCellState createState() => __TransparentCellState();
 }
