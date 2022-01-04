@@ -285,8 +285,8 @@ class Gen_Crossword { //Сгенерированный кроссворд
 
   Widget ToWidgets()  //Неопсредственно сборка кроссворда
   {
-    var word_inputs = <Word>[];
-    var positioned_words = <Positioned>[];
+    var word_inputs = <Word>[]; //Вводимые слова
+    var positioned_words = <Positioned>[];  //Непосредственно виджеты слов, расположенные на поле
     for (var Field in field_words)
     {
       word_inputs.add(CreateWord(Field, word_inputs));
@@ -321,7 +321,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
     {
       //1. Проверка на пересечение
       bool is_created = false;
-      for (var inters in field.intersec)
+      for (var inters in field.intersec)  //Создание пересечений
       {
         if (i == inters.index)
         {
@@ -330,6 +330,8 @@ class Gen_Crossword { //Сгенерированный кроссворд
             clone: other[inters.source],
             source: inters.source_index,
             letter: field.word.substring(i, i+1),
+            let_ind: i,
+            word_ind: other.length,
           ));
           is_created = true;
         }
@@ -347,7 +349,10 @@ class Gen_Crossword { //Сгенерированный кроссворд
         {
           Cells.add(CellCross(
             last: i == field.length-1?true:false,
-            letter: field.word.substring(i, i+1),)
+            letter: field.word.substring(i, i+1),
+            let_ind: i,
+            word_ind: other.length,
+            ),      
           );
         }
       }
@@ -394,22 +399,22 @@ class Field_Word {  //Слово, расположенное на поле
     }
   }
 
-  void UpdateHighlight(int h)
-  {
-    highlighted = h;
-    if (h != -1)
-    {
-      parent.chosen = num;
-    }
-    else
-    {
-      if (parent.chosen == num)
-      {
-        parent.chosen = -1;
-      }
-    }
-    //parent.update();
-  }
+  // void UpdateHighlight(int h)
+  // {
+  //   highlighted = h;
+  //   if (h != -1)
+  //   {
+  //     parent.chosen = num;
+  //   }
+  //   else
+  //   {
+  //     if (parent.chosen == num)
+  //     {
+  //       parent.chosen = -1;
+  //     }
+  //   }
+  //   //parent.update();
+  // }
 
   int highlighted = -1; //Индекс подсвеченной ячейки (-1 если ни одна не подсвечена)
   String word;  //Непосредственно само слово

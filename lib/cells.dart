@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 
 import 'package:wiki_cross/crossgen.dart';
+import 'main.dart';
 
 class Word extends StatelessWidget {
   const Word ({ Key? key, required this.hor, required this.children, required this.parent, required this.index}) : super(key: key);
@@ -47,7 +48,7 @@ class Word extends StatelessWidget {
     parent.in_word.replaceRange(index, index+1, let);
   }
   
-  void ChangeFocus(bool value, int index) //Подсветить ячейку под номером index
+  void ChangeFocus(bool value, int index, BuildContext it_context) //Подсветить ячейку под номером index
   {
     dynamic child = children[index];
     if (child.runtimeType == CellCross)
@@ -55,7 +56,7 @@ class Word extends StatelessWidget {
       try
       {
         child.setHighlighted(value);
-        parent.UpdateHighlight(value?index:-1);
+        // print('Highlight');
       }
       on NoSuchMethodError 
       {
@@ -63,13 +64,15 @@ class Word extends StatelessWidget {
         return;
       }
     }
-    parent.highlighted = value?index:-1;
+    // parent.highlighted = value?index:-1;
   }
 }
 
 class CellCross extends StatefulWidget { //Ячейка кроссворда
-  CellCross({ Key? key, required this.last, this.letter:'A', this.pseudo_focused:false}) : super(key: key);
+  CellCross({ Key? key, required this.last, this.letter:'A', this.pseudo_focused:false, required this.let_ind, required this.word_ind}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
+  final int let_ind;
+  final int word_ind;
   String letter;  //Буква на этом месте
   @override
   __CellCrossState createState() => __CellCrossState();
@@ -146,6 +149,10 @@ class __CellCrossState extends State<CellCross> {
 
   @override
   Widget build(BuildContext context) {
+    if (_focused)
+    {
+      print('I have focus');
+    }
     return SizedBox(
       width: 80,
       height: 80,
@@ -157,6 +164,11 @@ class __CellCrossState extends State<CellCross> {
             child: InkWell(
               onFocusChange: (bool f) {
                 if (f) {
+                  var parent = MyHomePage.of(context);
+                  if (parent != null)
+                  {
+                    parent.ChooseWord(widget.word_ind);
+                  }
                   myFocusNode.requestFocus();
                 }
               },
@@ -182,11 +194,13 @@ class __CellCrossState extends State<CellCross> {
 
 //TransparentCell - прозрачная ячейка кроссворда, для случаев пересечения
 class TransparentCell extends StatefulWidget { //Ячейка кроссворда
-  TransparentCell({ Key? key, required this.last, this.letter:'A', required this.clone, required this.source}) : super(key: key);
+  TransparentCell({ Key? key, required this.last, this.letter:'A', required this.clone, required this.source, required this.let_ind, required this.word_ind}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
   final String letter;  //Буква на этом месте
   final Word clone; //Оригинальное слово, на букву которого наслаивается данная ячейка
   final int source; //Индекс пересечения в оригинальном слове
+  final int let_ind;
+  final int word_ind;
   @override
   __TransparentCellState createState() => __TransparentCellState();
 }
@@ -205,7 +219,7 @@ class __TransparentCellState extends State<TransparentCell> {
         if (myFocusNode.hasFocus != _focused) {
           setState(() {
             _focused = myFocusNode.hasFocus;
-            widget.clone.ChangeFocus(_focused, widget.source);
+            // widget.clone.ChangeFocus(_focused, widget.source);
           });
         }
       });
@@ -251,7 +265,7 @@ class __TransparentCellState extends State<TransparentCell> {
             if (f) {
               myFocusNode.requestFocus();
             }
-            widget.clone.ChangeFocus(f, widget.source);
+            widget.clone.ChangeFocus(f, widget.source, context);
           },
           child: txt,
         )       

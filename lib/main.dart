@@ -34,15 +34,22 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({UniqueKey? key, required this.title}) : super(key: key);
   final String title;
-  int chosen = -1;  //Выбранное слово
+  
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => MyHomePageState();
+
+  static MyHomePageState? of (BuildContext context)
+  {
+    var res = context.findAncestorStateOfType<MyHomePageState>();
+    return res;
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   List <Field_Word> Words = [];
+  int chosen = -1;  //Выбранное слово
   late Gen_Crossword crossword;
   @override
   void initState()
@@ -58,12 +65,24 @@ class _MyHomePageState extends State<MyHomePage> {
       word.parent = widget;
     }
     var Widgets = crossword.ToWidgets();
-    var def = Definition(source: widget.chosen == -1?null:Words[widget.chosen]);
+    var def = Definition(source: chosen == -1?null:Words[chosen]);
     return Scaffold(
       bottomSheet: def,
-      body: Widgets,
+      body: Builder(
+        builder: (BuildContext context) {
+          return Widgets;
+        }
+      ),
     );
   }
+
+  void ChooseWord(int value)
+  { 
+    setState(() {
+      chosen = value;
+    });
+  }
+
 }
 
 class Definition extends StatefulWidget {
