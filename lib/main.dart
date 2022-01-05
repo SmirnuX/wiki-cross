@@ -49,7 +49,8 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage> {
   List <Field_Word> Words = [];
-  int chosen = -1;  //Выбранное слово
+  int chosen = 0;  //Выбранное слово
+  int chosen_let = -1;  //Выбранная буква
   late Gen_Crossword crossword;
   @override
   void initState()
@@ -65,7 +66,7 @@ class MyHomePageState extends State<MyHomePage> {
       word.parent = widget;
     }
     var Widgets = crossword.ToWidgets();
-    var def = Definition(source: chosen == -1?null:Words[chosen]);
+    var def = Definition(source: chosen == -1?null:Words[chosen], index: chosen_let);
     return Scaffold(
       bottomSheet: def,
       body: Builder(
@@ -76,22 +77,35 @@ class MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void ChooseWord(int value)
+  void ChooseWord(int value, int second)
   { 
     setState(() {
       chosen = value;
+      chosen_let = second;
     });
   }
 
 }
 
 class Definition extends StatefulWidget {
-  Definition({ Key? key, this.source}) : super(key: key);
+  Definition({ Key? key, this.source, required this.index}) : super(key: key);
   Field_Word? source;
+  int index;
   final TextStyle Header_style = const TextStyle(
     fontSize: 30,
     fontFamily: 'Arial'
   );
+  final TextStyle Header_const_style = TextStyle(
+    fontSize: 30,
+    fontFamily: 'Arial',
+    backgroundColor: Colors.grey[200],
+  );
+  final TextStyle Header_focus_style = TextStyle(
+    fontSize: 30,
+    fontFamily: 'Arial',
+    backgroundColor: Colors.lightGreen[300],
+  );
+
   final TextStyle Definit_style = const TextStyle(
     fontSize: 20
   );
@@ -108,21 +122,39 @@ class _DefinitionState extends State<Definition> {
 
   @override
   Widget build(BuildContext context) {
-    String result = '';
+    List<AutoSizeText> res = [];  //Непосредственно слово
+    //String result = '';
     if (widget.source != null)
     {
       for (int i = 0; i < widget.source!.length; i++)
       {
         if (widget.source!.word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
         {
-          result += widget.source!.word.substring(i, i+1);
+          res.add(AutoSizeText
+          (widget.source!.word.substring(i, i+1),
+            style: widget.Header_const_style,
+            maxFontSize: 30,
+            maxLines: 1,
+            wrapWords: false,
+            textAlign: TextAlign.left,
+          ));
+
         }
         else
         {
           String letter = widget.source!.in_word.substring(i, i+1);
-          result += letter==' '?'_':letter;
+          res.add(AutoSizeText
+          (letter==' '?'_':letter,
+            style: i==widget.index?widget.Header_focus_style:widget.Header_style,
+            maxFontSize: 30,
+            maxLines: 1,
+            wrapWords: false,
+            textAlign: TextAlign.left,
+          ));
+          
+          // result += letter==' '?'_':letter;
         }
-        result += ' ';
+        // result += ' ';
       }
     }
     return Card(
@@ -132,7 +164,7 @@ class _DefinitionState extends State<Definition> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          Container(  //Номер слова
             margin: const EdgeInsets.fromLTRB(15, 10, 15, 5),
             child: Chip( 
               label:Text(
@@ -141,20 +173,15 @@ class _DefinitionState extends State<Definition> {
               )
             )
           ),
-          Container(
-            child: AutoSizeText (
-              result,
-              maxFontSize: 30,
-              maxLines: 1,
-              wrapWords: false,
-              textAlign: TextAlign.left,
-              style: widget.Header_style,
+          Container(  //Само слово
+            child: Row (
+              children: res,
             ),
             margin: const EdgeInsets.fromLTRB(15, 5, 15, 5),
           ),
           const Divider(
           ),
-          Container(
+          Container(  //Определение слова
             child:Text(
               (widget.source==null)?'':widget.source!.definition,
               style: widget.Definit_style,

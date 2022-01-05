@@ -167,7 +167,7 @@ class __CellCrossState extends State<CellCross> {
                   var parent = MyHomePage.of(context);
                   if (parent != null)
                   {
-                    parent.ChooseWord(widget.word_ind);
+                    parent.ChooseWord(widget.word_ind, widget.let_ind);
                   }
                   myFocusNode.requestFocus();
                 }
