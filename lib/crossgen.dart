@@ -314,7 +314,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
 
   Word CreateWord(Field_Word field, List<Word> other) //Добавление нового слова
   {
-    Widget Word_container;
+    //Widget Word_container;
     //Наполнение слова
     var Cells = <Widget>[]; //Ячейки слова
     for (int i = 0; i < field.length; i++)
@@ -327,7 +327,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
         {
           Cells.add(TransparentCell(
             last: i == field.length-1?true:false, 
-            clone: other[inters.source],
+            clone_ind: inters.source,
             source: inters.source_index,
             letter: field.word.substring(i, i+1),
             let_ind: i,
@@ -399,24 +399,6 @@ class Field_Word {  //Слово, расположенное на поле
     }
   }
 
-  // void UpdateHighlight(int h)
-  // {
-  //   highlighted = h;
-  //   if (h != -1)
-  //   {
-  //     parent.chosen = num;
-  //   }
-  //   else
-  //   {
-  //     if (parent.chosen == num)
-  //     {
-  //       parent.chosen = -1;
-  //     }
-  //   }
-  //   //parent.update();
-  // }
-
-  int highlighted = -1; //Индекс подсвеченной ячейки (-1 если ни одна не подсвечена)
   String word;  //Непосредственно само слово
   late String in_word; //Введенное слово
   String definition;  //Определение этого слова
@@ -425,7 +407,6 @@ class Field_Word {  //Слово, расположенное на поле
   late int length; //Длина слова
   bool hor; //Горизонтально ли расположено слово
   late List <Intersection> intersec; //Массив, указывающий, какие ячейки являются пересечениями
-  late MyHomePage parent;
 }
 
 class Intersection {  //Класс для обозначения пересечений

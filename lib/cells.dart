@@ -41,14 +41,14 @@ class Word extends StatelessWidget {
       }
       on NoSuchMethodError 
       {
-        print('setText not found');
+        // print('setText not found');
         return;
       }
     }
     parent.in_word.replaceRange(index, index+1, let);
   }
   
-  void ChangeFocus(bool value, int index, BuildContext it_context) //Подсветить ячейку под номером index
+  void ChangeFocus(bool value, int index) //Подсветить ячейку под номером index
   {
     dynamic child = children[index];
     if (child.runtimeType == CellCross)
@@ -96,17 +96,17 @@ class CellCross extends StatefulWidget { //Ячейка кроссворда
 class __CellCrossState extends State<CellCross> {
   final for_color = Colors.white;
   final sel_color = Colors.green[50];
-  final _biggerFont = TextStyle(fontSize: 40);
-  final _transparentFont = TextStyle(fontSize: 40, color: Colors.grey[600]);
+  final _biggerFont = const TextStyle(fontSize: 40);
+  final _transparentFont = TextStyle(fontSize: 40, color: Colors.grey[200]);
+  String in_letter = '';
   bool _focused = false;
   FocusNode myFocusNode = FocusNode();
   late _CellFormatter txt_format = _CellFormatter(node:myFocusNode, is_last:widget.last);
-  late TextField txt;
   
- 
   @override
   void initState()
   {
+    super.initState();
     myFocusNode.addListener(() { 
       setState(() {
         if (myFocusNode.hasFocus != _focused) {
@@ -116,43 +116,23 @@ class __CellCrossState extends State<CellCross> {
         }
       });
     });
-    txt = TextField(
-      autocorrect: false,
-      enableSuggestions: false,
-      enableIMEPersonalizedLearning: false,
-      onTap: () { 
-        //myFocusNode.requestFocus();
-      },
-      cursorColor: (_focused || widget.pseudo_focused)?sel_color:for_color,
-      showCursor: false,
-      focusNode: myFocusNode,
-      textInputAction: TextInputAction.next,
-      controller: widget.txt_controller,
-      decoration: null,
-      style: _biggerFont,
-      textAlign: TextAlign.center,
-      maxLength: 2, //Extra character for next symbol
-      // onChanged: (String value) {
-      //   myFocusNode.nextFocus();
-      // },
-      inputFormatters: [
-        txt_format,
-      ],
-    );
   }
 
   @override
   void dispose()
   {
     myFocusNode.dispose();
+    super.dispose();
   }
+
+  void SetLetter(String value)
+  {
+    in_letter = value;
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    if (_focused)
-    {
-      print('I have focus');
-    }
     return SizedBox(
       width: 80,
       height: 80,
@@ -176,11 +156,35 @@ class __CellCrossState extends State<CellCross> {
                 child: Stack(
                   children: [
                     Text(
-                      widget.letter,
-                      style: _transparentFont,
+                      in_letter,
+                      style: _biggerFont,
                       textAlign: TextAlign.center,
                     ),
-                    txt,
+                    TextField(
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      enableIMEPersonalizedLearning: false,
+                      cursorColor: (_focused || widget.pseudo_focused)?sel_color:for_color,
+                      showCursor: false,
+                      focusNode: myFocusNode,
+                      textInputAction: TextInputAction.next,
+                      controller: widget.txt_controller,
+                      decoration: null,
+                      style: _biggerFont,
+                      textAlign: TextAlign.center,
+                      maxLength: 2, //Extra character for next symbol
+                      onChanged: (String value) {
+                        var parent = MyHomePage.of(context);
+                        if (parent != null)
+                        {
+                          parent.ChangeLetter(value, widget.word_ind, widget.let_ind);
+                        }
+                        in_letter = value;
+                      },
+                      inputFormatters: [
+                        txt_format,
+                      ],
+                    ),
                   ],
                 )   
               ) 
@@ -194,10 +198,10 @@ class __CellCrossState extends State<CellCross> {
 
 //TransparentCell - прозрачная ячейка кроссворда, для случаев пересечения
 class TransparentCell extends StatefulWidget { //Ячейка кроссворда
-  TransparentCell({ Key? key, required this.last, this.letter:'A', required this.clone, required this.source, required this.let_ind, required this.word_ind}) : super(key: key);
+  TransparentCell({ Key? key, required this.last, this.letter:'A', required this.clone_ind, required this.source, required this.let_ind, required this.word_ind}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
   final String letter;  //Буква на этом месте
-  final Word clone; //Оригинальное слово, на букву которого наслаивается данная ячейка
+  final int clone_ind; //Оригинальное слово, на букву которого наслаивается данная ячейка
   final int source; //Индекс пересечения в оригинальном слове
   final int let_ind;
   final int word_ind;
@@ -214,43 +218,24 @@ class __TransparentCellState extends State<TransparentCell> {
   @override
   void initState()
   {
+    super.initState();
     myFocusNode.addListener(() { 
       setState(() {
         if (myFocusNode.hasFocus != _focused) {
           setState(() {
             _focused = myFocusNode.hasFocus;
-            // widget.clone.ChangeFocus(_focused, widget.source);
           });
         }
       });
     });
-    txt = TextField(
-      autocorrect: false,
-      enableSuggestions: false,
-      enableIMEPersonalizedLearning: false,
-      onTap: () { 
-        //myFocusNode.requestFocus();
-      },
-      showCursor: false,
-      focusNode: myFocusNode,
-      textInputAction: TextInputAction.next,
-      //controller: txt,
-      decoration: null,
-      textAlign: TextAlign.center,
-      maxLength: 2, //Extra character for next symbol
-      onChanged: (String value) {
-        widget.clone.ChangeLetter(value, widget.source);
-      },
-      inputFormatters: [
-        txt_format,
-      ],
-    );
+
   }
 
   @override
   void dispose()
   {
     myFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -262,12 +247,45 @@ class __TransparentCellState extends State<TransparentCell> {
         opacity: 0.0,
         child: InkWell(
           onFocusChange: (bool f) {
-            if (f) {
+            var parent = MyHomePage.of(context);
+            if (f) {     
+              if (parent != null)
+              {
+                parent.ChooseWord(widget.word_ind, widget.let_ind);
+              }
               myFocusNode.requestFocus();
             }
-            widget.clone.ChangeFocus(f, widget.source, context);
+            if (parent != null)
+            {
+              parent.ChangeFocus(f, widget.clone_ind, widget.source);
+            }
           },
-          child: txt,
+          child: TextField(
+            autocorrect: false,
+            enableSuggestions: false,
+            enableIMEPersonalizedLearning: false,
+            onTap: () { 
+              //myFocusNode.requestFocus();
+            },
+            showCursor: false,
+            focusNode: myFocusNode,
+            textInputAction: TextInputAction.next,
+            //controller: txt,
+            decoration: null,
+            textAlign: TextAlign.center,
+            maxLength: 2, //Extra character for next symbol
+            onChanged: (String value) {
+              var parent = MyHomePage.of(context);   
+              if (parent != null)
+              {
+                parent.ChangeLetter(value, widget.clone_ind, widget.source);
+                parent.ChangeLetter(value, widget.word_ind, widget.let_ind);
+              }
+            },
+            inputFormatters: [
+              txt_format,
+            ],
+          ),
         )       
       )
     );
@@ -358,7 +376,6 @@ class _CellFormatter extends TextInputFormatter {  //Форматировани�
       TextEditingValue oldValue,
       TextEditingValue newValue
       ) {
-        print('Prev: \"$oldValue\", Next: \"$newValue\"');
         if (newValue.text.contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]"))) //Посторонние символы
         {
           return TextEditingValue();  //Сброс ячейки

@@ -61,10 +61,6 @@ class MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    for (var word in Words)
-    {
-      word.parent = widget;
-    }
     var Widgets = crossword.ToWidgets();
     var def = Definition(source: chosen == -1?null:Words[chosen], index: chosen_let);
     return Scaffold(
@@ -85,6 +81,26 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void ChangeFocus(bool value, int word_ind, int let_ind)
+  {
+
+  }
+
+  void ChangeLetter(String value, int word_ind, int let_ind)
+  {
+    setState(() {
+      if (value != '')
+      {
+        Words[word_ind].in_word = Words[word_ind].in_word.replaceRange(let_ind, let_ind + 1, value);
+      }
+      else
+      {
+        Words[word_ind].in_word = Words[word_ind].in_word.replaceRange(let_ind, let_ind + 1, '_');
+      }
+      
+    });  
+  }
+
 }
 
 class Definition extends StatefulWidget {
@@ -98,7 +114,7 @@ class Definition extends StatefulWidget {
   final TextStyle Header_const_style = TextStyle(
     fontSize: 30,
     fontFamily: 'Arial',
-    backgroundColor: Colors.grey[200],
+    color: Colors.grey[400],
   );
   final TextStyle Header_focus_style = TextStyle(
     fontSize: 30,
