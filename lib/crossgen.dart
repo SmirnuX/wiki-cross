@@ -134,7 +134,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
         dead_end = true;
       }
     }
-
+    word_count = field_words.length;
     //Перемещение левого верхнего угла поля в начало координат
     for (int i = 0; i < field_words.length; i++)
     {
@@ -312,6 +312,35 @@ class Gen_Crossword { //Сгенерированный кроссворд
       );
   }
 
+  Widget ToWidgetsHighlight(int word_ind, int let_ind, List<Field_Word> source)
+  {
+    var word_inputs = <Word>[]; //Виджеты слов
+    var positioned_words = <Positioned>[];  //Виджеты слов, расположенные на поле
+    for (int i = 0; i < source.length; i++)
+    {
+      word_inputs.add(CreateWord(source[i], word_inputs));
+      positioned_words.add(Positioned(
+        child: word_inputs.last,
+        top: source[i].y.toDouble() * 80,
+        left: source[i].x.toDouble() * 80,
+      ));
+    }
+    return InteractiveViewer(
+        minScale: 0.001,
+        maxScale: 8.0,
+        boundaryMargin: EdgeInsets.all(max(width.toDouble(), height.toDouble())), //ax(w,h)
+        constrained: false,
+        child: SizedBox(
+          width: width.toDouble(),
+          height: height.toDouble(),
+          child: Stack(
+            //clipBehavior: Clip.none,
+            children: positioned_words
+            ),
+        ) 
+      );
+  }
+
   Word CreateWord(Field_Word field, List<Word> other) //Добавление нового слова
   {
     //Widget Word_container;
@@ -329,7 +358,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
             last: i == field.length-1?true:false, 
             clone_ind: inters.source,
             source: inters.source_index,
-            letter: field.word.substring(i, i+1),
+            letter: '',
             let_ind: i,
             word_ind: other.length,
           ));
@@ -349,9 +378,10 @@ class Gen_Crossword { //Сгенерированный кроссворд
         {
           Cells.add(CellCross(
             last: i == field.length-1?true:false,
-            letter: field.word.substring(i, i+1),
+            letter: field.in_word.substring(i, i+1) == '_'?' ':field.in_word.substring(i, i+1),
             let_ind: i,
             word_ind: other.length,
+            pseudo_focused: field.highlighted == i,
             ),      
           );
         }
@@ -398,7 +428,7 @@ class Field_Word {  //Слово, расположенное на поле
       }
     }
   }
-
+  int highlighted = -1;
   String word;  //Непосредственно само слово
   late String in_word; //Введенное слово
   String definition;  //Определение этого слова

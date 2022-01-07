@@ -61,13 +61,12 @@ class MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var Widgets = crossword.ToWidgets();
-    var def = Definition(source: chosen == -1?null:Words[chosen], index: chosen_let);
+    var def = Definition(source: chosen == -1?Words[0]:Words[chosen], index: chosen_let, num: crossword.word_count);
     return Scaffold(
       bottomSheet: def,
       body: Builder(
         builder: (BuildContext context) {
-          return Widgets;
+          return crossword.ToWidgets();
         }
       ),
     );
@@ -83,7 +82,7 @@ class MyHomePageState extends State<MyHomePage> {
 
   void ChangeFocus(bool value, int word_ind, int let_ind)
   {
-
+    Words[word_ind].highlighted = value?let_ind:-1;
   }
 
   void ChangeLetter(String value, int word_ind, int let_ind)
@@ -97,16 +96,17 @@ class MyHomePageState extends State<MyHomePage> {
       {
         Words[word_ind].in_word = Words[word_ind].in_word.replaceRange(let_ind, let_ind + 1, '_');
       }
-      
+      crossword.field_words.setAll(0, Words);
     });  
   }
 
 }
 
 class Definition extends StatefulWidget {
-  Definition({ Key? key, this.source, required this.index}) : super(key: key);
+  Definition({ Key? key, this.source, required this.index, required this.num}) : super(key: key);
   Field_Word? source;
   int index;
+  int num;
   final TextStyle Header_style = const TextStyle(
     fontSize: 30,
     fontFamily: 'Arial'
@@ -139,7 +139,6 @@ class _DefinitionState extends State<Definition> {
   @override
   Widget build(BuildContext context) {
     List<AutoSizeText> res = [];  //Непосредственно слово
-    //String result = '';
     if (widget.source != null)
     {
       for (int i = 0; i < widget.source!.length; i++)
@@ -184,7 +183,7 @@ class _DefinitionState extends State<Definition> {
             margin: const EdgeInsets.fromLTRB(15, 10, 15, 5),
             child: Chip( 
               label:Text(
-                (widget.source==null)?'':'${widget.source!.num+1}/10',
+                (widget.source==null)?'':'${widget.source!.num+1}/${widget.num}',
                 style: widget.Counter_style,
               )
             )

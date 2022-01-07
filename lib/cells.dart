@@ -154,9 +154,10 @@ class __CellCrossState extends State<CellCross> {
               },
               child: Center(
                 child: Stack(
+                  alignment: AlignmentDirectional.center,
                   children: [
                     Text(
-                      in_letter,
+                      widget.letter,
                       style: _biggerFont,
                       textAlign: TextAlign.center,
                     ),
