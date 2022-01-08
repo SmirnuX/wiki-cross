@@ -289,7 +289,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
     var positioned_words = <Positioned>[];  //Непосредственно виджеты слов, расположенные на поле
     for (var Field in field_words)
     {
-      word_inputs.add(CreateWord(Field, word_inputs));
+      word_inputs.add(CreateWord(Field, word_inputs, false));
       positioned_words.add(Positioned(
         child: word_inputs.last,
         top: Field.y.toDouble() * 80,
@@ -318,7 +318,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
     var positioned_words = <Positioned>[];  //Виджеты слов, расположенные на поле
     for (int i = 0; i < source.length; i++)
     {
-      word_inputs.add(CreateWord(source[i], word_inputs));
+      word_inputs.add(CreateWord(source[i], word_inputs, i == word_ind));
       positioned_words.add(Positioned(
         child: word_inputs.last,
         top: source[i].y.toDouble() * 80,
@@ -341,7 +341,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
       );
   }
 
-  Word CreateWord(Field_Word field, List<Word> other) //Добавление нового слова
+  Word CreateWord(Field_Word field, List<Word> other, bool word_highlight) //Добавление нового слова
   {
     //Widget Word_container;
     //Наполнение слова
@@ -382,6 +382,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
             let_ind: i,
             word_ind: other.length,
             pseudo_focused: field.highlighted == i,
+            light_highlight: word_highlight,
             ),      
           );
         }

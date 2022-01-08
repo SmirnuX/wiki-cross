@@ -66,7 +66,7 @@ class MyHomePageState extends State<MyHomePage> {
       bottomSheet: def,
       body: Builder(
         builder: (BuildContext context) {
-          return crossword.ToWidgets();
+          return crossword.ToWidgetsHighlight(chosen, chosen_let, Words);
         }
       ),
     );
@@ -83,6 +83,11 @@ class MyHomePageState extends State<MyHomePage> {
   void ChangeFocus(bool value, int word_ind, int let_ind)
   {
     Words[word_ind].highlighted = value?let_ind:-1;
+  }
+
+  void ChangeHighlight()
+  {
+    
   }
 
   void ChangeLetter(String value, int word_ind, int let_ind)
@@ -197,9 +202,10 @@ class _DefinitionState extends State<Definition> {
           const Divider(
           ),
           Container(  //Определение слова
-            child:Text(
+            child:AutoSizeText(
               (widget.source==null)?'':widget.source!.definition,
               style: widget.Definit_style,
+              maxLines: 5, 
             ),
             margin: const EdgeInsets.all(10),
           ),

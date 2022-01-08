@@ -69,15 +69,24 @@ class Word extends StatelessWidget {
 }
 
 class CellCross extends StatefulWidget { //Ячейка кроссворда
-  CellCross({ Key? key, required this.last, this.letter:'A', this.pseudo_focused:false, required this.let_ind, required this.word_ind}) : super(key: key);
+  CellCross({ Key? key, required this.last, this.letter:'A', this.pseudo_focused:false, required this.let_ind, required this.word_ind, required this.light_highlight, this.clone_ind = -1, this.clone_let_ind = -1}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
-  final int let_ind;
-  final int word_ind;
+
+  final int let_ind;  //Индекс буквы
+  final int word_ind; //Индекс слова
+
+  final bool light_highlight; //Подсветка всего слова
+  bool pseudo_focused;  //Подсветка буквы (когда фокус на перекрывающем элементе)
+  
   String letter;  //Буква на этом месте
+
+  final int clone_ind;  //Индекс слова перекрывающей/перекрытой ячейки [-1]
+  final int clone_let_ind;  //Индекс непосредственно ячейки [-1]
+
   @override
   __CellCrossState createState() => __CellCrossState();
+
   var txt_controller = TextEditingController();
-  bool pseudo_focused;
   ValueNotifier <bool> notifier = ValueNotifier(false);
 
   void setText(String let)
@@ -88,14 +97,15 @@ class CellCross extends StatefulWidget { //Ячейка кроссворда
   void setHighlighted(bool value)
   {
     pseudo_focused = value;
-    notifier.value = value;
+    // notifier.value = value;
   }
-
 }
 
 class __CellCrossState extends State<CellCross> {
-  final for_color = Colors.white;
-  final sel_color = Colors.green[50];
+  //TODO - вывести в тему
+  final for_color = Colors.white; //Цвет фона ячейки
+  final sel_color = Colors.green[100]; //Цвет выбранной ячейки
+  final light_color = Colors.lightGreen[50];  //Подсветка всего слова
   final _biggerFont = const TextStyle(fontSize: 40);
   final _transparentFont = TextStyle(fontSize: 40, color: Colors.grey[200]);
   String in_letter = '';
@@ -130,7 +140,6 @@ class __CellCrossState extends State<CellCross> {
     in_letter = value;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -140,16 +149,22 @@ class __CellCrossState extends State<CellCross> {
         valueListenable: widget.notifier,
         builder: (BuildContext context, bool smth, Widget? child) {
           return Card(
-            color: (_focused || widget.pseudo_focused)?sel_color:for_color, 
+            color: (_focused || widget.pseudo_focused)?sel_color:widget.light_highlight?light_color:for_color, 
             child: InkWell(
               onFocusChange: (bool f) {
                 if (f) {
                   var parent = MyHomePage.of(context);
-                  if (parent != null)
-                  {
-                    parent.ChooseWord(widget.word_ind, widget.let_ind);
+                  if (f) {     
+                    if (parent != null)
+                    {
+                      parent.ChooseWord(widget.word_ind, widget.let_ind);
+                    }
+                    myFocusNode.requestFocus();
                   }
-                  myFocusNode.requestFocus();
+                  // if (parent != null)
+                  // {
+                  //   parent.ChangeFocus(f, widget.clone_ind, widget.clone_let_ind);
+                  // }
                 }
               },
               child: Center(
@@ -251,8 +266,15 @@ class __TransparentCellState extends State<TransparentCell> {
             var parent = MyHomePage.of(context);
             if (f) {     
               if (parent != null)
-              {
-                parent.ChooseWord(widget.word_ind, widget.let_ind);
+              {  
+                if (parent.chosen == widget.word_ind)
+                {
+                  parent.ChooseWord(widget.clone_ind, widget.source);
+                }
+                else
+                {
+                  parent.ChooseWord(widget.word_ind, widget.let_ind);
+                }
               }
               myFocusNode.requestFocus();
             }
@@ -261,13 +283,25 @@ class __TransparentCellState extends State<TransparentCell> {
               parent.ChangeFocus(f, widget.clone_ind, widget.source);
             }
           },
-          child: TextField(
+          onTap: () { //Смена выбранного слова
+            var parent = MyHomePage.of(context);    
+            print('TAP');
+            if (parent != null)
+            {
+              if (parent.chosen == widget.word_ind)
+              {
+                parent.ChooseWord(widget.clone_ind, widget.source);
+              }
+              else
+              {
+                parent.ChooseWord(widget.word_ind, widget.let_ind);
+              }
+            }
+          },
+          child: IgnorePointer (child: TextField(
             autocorrect: false,
             enableSuggestions: false,
             enableIMEPersonalizedLearning: false,
-            onTap: () { 
-              //myFocusNode.requestFocus();
-            },
             showCursor: false,
             focusNode: myFocusNode,
             textInputAction: TextInputAction.next,
@@ -286,7 +320,7 @@ class __TransparentCellState extends State<TransparentCell> {
             inputFormatters: [
               txt_format,
             ],
-          ),
+          ),),
         )       
       )
     );
