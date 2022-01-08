@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types, non_constant_identifier_names
+
 import 'package:wiki_cross/crossgen.dart';
 
 class test_words_set {

@@ -155,16 +155,12 @@ class __CellCrossState extends State<CellCross> {
                 if (f) {
                   var parent = MyHomePage.of(context);
                   if (f) {     
-                    if (parent != null)
+                    if (parent != null) //Выбор слова
                     {
                       parent.ChooseWord(widget.word_ind, widget.let_ind);
                     }
                     myFocusNode.requestFocus();
                   }
-                  // if (parent != null)
-                  // {
-                  //   parent.ChangeFocus(f, widget.clone_ind, widget.clone_let_ind);
-                  // }
                 }
               },
               child: Center(
@@ -194,6 +190,10 @@ class __CellCrossState extends State<CellCross> {
                         if (parent != null)
                         {
                           parent.ChangeLetter(value, widget.word_ind, widget.let_ind);
+                          if (widget.clone_ind != -1)
+                          {
+                            parent.ChangeLetter(value, widget.clone_ind, widget.clone_let_ind); //Изменение буквы в пересечении
+                          }
                         }
                         in_letter = value;
                       },
@@ -345,6 +345,7 @@ class __ReadOnlyCellState extends State<ReadOnlyCell> {
   @override
   void initState()
   {
+    super.initState();
     myFocusNode.addListener(() { 
       setState(() {
         if (myFocusNode.hasFocus != _focused) {
@@ -367,6 +368,7 @@ class __ReadOnlyCellState extends State<ReadOnlyCell> {
   void dispose()
   {
     myFocusNode.dispose();
+    super.dispose();
   }
 
   @override

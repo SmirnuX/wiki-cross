@@ -85,6 +85,11 @@ class MyHomePageState extends State<MyHomePage> {
     Words[word_ind].highlighted = value?let_ind:-1;
   }
 
+  void RequestFocus(int word_ind, int let_ind)
+  {
+    Words[word_ind].toFocus = let_ind;
+  }
+
   void ChangeHighlight()
   {
     
