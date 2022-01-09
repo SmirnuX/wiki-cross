@@ -68,7 +68,7 @@ class Word extends StatelessWidget {
   }
 }
 
-class CellCross extends StatefulWidget { //Ячейка кроссворда
+class CellCross extends StatelessWidget { //Ячейка кроссворда
   CellCross({ Key? key, required this.last, this.letter:'A', this.pseudo_focused:false, required this.let_ind, required this.word_ind, required this.light_highlight, this.clone_ind = -1, this.clone_let_ind = -1}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
 
@@ -83,11 +83,16 @@ class CellCross extends StatefulWidget { //Ячейка кроссворда
   final int clone_ind;  //Индекс слова перекрывающей/перекрытой ячейки [-1]
   final int clone_let_ind;  //Индекс непосредственно ячейки [-1]
 
-  @override
-  __CellCrossState createState() => __CellCrossState();
-
   var txt_controller = TextEditingController();
   ValueNotifier <bool> notifier = ValueNotifier(false);
+
+  final for_color = Colors.white; //Цвет фона ячейки
+  final sel_color = Colors.green[100]; //Цвет выбранной ячейки
+  final light_color = Colors.lightGreen[50];  //Подсветка всего слова
+  final _biggerFont = const TextStyle(fontSize: 40);
+  late _CellFormatter txt_format = _CellFormatter(node:myFocusNode, is_last:last);
+
+  var myFocusNode = FocusNode();
 
   void setText(String let)
   {
@@ -99,277 +104,95 @@ class CellCross extends StatefulWidget { //Ячейка кроссворда
     pseudo_focused = value;
     // notifier.value = value;
   }
-}
-
-class __CellCrossState extends State<CellCross> {
-  //TODO - вывести в тему
-  final for_color = Colors.white; //Цвет фона ячейки
-  final sel_color = Colors.green[100]; //Цвет выбранной ячейки
-  final light_color = Colors.lightGreen[50];  //Подсветка всего слова
-  final _biggerFont = const TextStyle(fontSize: 40);
-  final _transparentFont = TextStyle(fontSize: 40, color: Colors.grey[200]);
-  String in_letter = '';
-  bool _focused = false;
-  FocusNode myFocusNode = FocusNode();
-  late _CellFormatter txt_format = _CellFormatter(node:myFocusNode, is_last:widget.last);
-  
-  @override
-  void initState()
-  {
-    super.initState();
-    myFocusNode.addListener(() { 
-      setState(() {
-        if (myFocusNode.hasFocus != _focused) {
-          setState(() {
-            _focused = myFocusNode.hasFocus;
-          });
-        }
-      });
-    });
-  }
-
-  @override
-  void dispose()
-  {
-    myFocusNode.dispose();
-    super.dispose();
-  }
-
-  void SetLetter(String value)
-  {
-    in_letter = value;
-  }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 80,
       height: 80,
-      child: ValueListenableBuilder(
-        valueListenable: widget.notifier,
-        builder: (BuildContext context, bool smth, Widget? child) {
-          return Card(
-            color: (_focused || widget.pseudo_focused)?sel_color:widget.light_highlight?light_color:for_color, 
-            child: InkWell(
-              onFocusChange: (bool f) {
-                if (f) {
-                  var parent = MyHomePage.of(context);
-                  if (f) {     
-                    if (parent != null) //Выбор слова
-                    {
-                      parent.ChooseWord(widget.word_ind, widget.let_ind);
-                    }
-                    myFocusNode.requestFocus();
-                  }
-                }
-              },
-              child: Center(
-                child: Stack(
-                  alignment: AlignmentDirectional.center,
-                  children: [
-                    Text(
-                      widget.letter,
-                      style: _biggerFont,
-                      textAlign: TextAlign.center,
-                    ),
-                    TextField(
-                      autocorrect: false,
-                      enableSuggestions: false,
-                      enableIMEPersonalizedLearning: false,
-                      cursorColor: (_focused || widget.pseudo_focused)?sel_color:for_color,
-                      showCursor: false,
-                      focusNode: myFocusNode,
-                      textInputAction: TextInputAction.next,
-                      controller: widget.txt_controller,
-                      decoration: null,
-                      style: _biggerFont,
-                      textAlign: TextAlign.center,
-                      maxLength: 2, //Extra character for next symbol
-                      onChanged: (String value) {
-                        var parent = MyHomePage.of(context);
-                        if (parent != null)
-                        {
-                          parent.ChangeLetter(value, widget.word_ind, widget.let_ind);
-                          if (widget.clone_ind != -1)
-                          {
-                            parent.ChangeLetter(value, widget.clone_ind, widget.clone_let_ind); //Изменение буквы в пересечении
-                          }
-                        }
-                        in_letter = value;
-                      },
-                      inputFormatters: [
-                        txt_format,
-                      ],
-                    ),
-                  ],
-                )   
-              ) 
-            )     
-          );
-        },
-      )   
-    );
-  }
-}
-
-//TransparentCell - прозрачная ячейка кроссворда, для случаев пересечения
-class TransparentCell extends StatefulWidget { //Ячейка кроссворда
-  TransparentCell({ Key? key, required this.last, this.letter:'A', required this.clone_ind, required this.source, required this.let_ind, required this.word_ind}) : super(key: key);
-  final bool last; //Является ли данная ячейка последней?
-  final String letter;  //Буква на этом месте
-  final int clone_ind; //Оригинальное слово, на букву которого наслаивается данная ячейка
-  final int source; //Индекс пересечения в оригинальном слове
-  final int let_ind;
-  final int word_ind;
-  @override
-  __TransparentCellState createState() => __TransparentCellState();
-}
-
-class __TransparentCellState extends State<TransparentCell> {
-  bool _focused = false;
-  FocusNode myFocusNode = FocusNode();
-  late _CellFormatter txt_format = _CellFormatter(node:myFocusNode, is_last:widget.last);
-  late TextField txt;
-
-  @override
-  void initState()
-  {
-    super.initState();
-    myFocusNode.addListener(() { 
-      setState(() {
-        if (myFocusNode.hasFocus != _focused) {
-          setState(() {
-            _focused = myFocusNode.hasFocus;
-          });
-        }
-      });
-    });
-
-  }
-
-  @override
-  void dispose()
-  {
-    myFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 80,
-      height: 80,
-      child: Opacity(
-        opacity: 0.0,
+      child: Card(
+        color: (pseudo_focused)?sel_color:light_highlight?light_color:for_color, 
         child: InkWell(
+          focusNode: myFocusNode,
           onFocusChange: (bool f) {
+            print('Changed focus on ${word_ind}');
             var parent = MyHomePage.of(context);
-            if (f) {     
-              if (parent != null)
-              {  
-                if (parent.chosen == widget.word_ind)
-                {
-                  parent.ChooseWord(widget.clone_ind, widget.source);
-                }
-                else
-                {
-                  parent.ChooseWord(widget.word_ind, widget.let_ind);
-                }
-              }
-              myFocusNode.requestFocus();
-            }
             if (parent != null)
             {
-              parent.ChangeFocus(f, widget.clone_ind, widget.source);
-            }
-          },
-          onTap: () { //Смена выбранного слова
-            var parent = MyHomePage.of(context);    
-            print('TAP');
-            if (parent != null)
-            {
-              if (parent.chosen == widget.word_ind)
-              {
-                parent.ChooseWord(widget.clone_ind, widget.source);
+              if (f) 
+              {     
+                parent.ChooseWord(word_ind, let_ind);
               }
-              else
+              parent.ChangeFocus(f, word_ind, let_ind);
+              if (clone_ind != -1)
               {
-                parent.ChooseWord(widget.word_ind, widget.let_ind);
+                parent.ChangeFocus(f, clone_ind, clone_let_ind); //Изменение буквы в пересечении
               }
             }
           },
-          child: IgnorePointer (child: TextField(
-            autocorrect: false,
-            enableSuggestions: false,
-            enableIMEPersonalizedLearning: false,
-            showCursor: false,
-            focusNode: myFocusNode,
-            textInputAction: TextInputAction.next,
-            //controller: txt,
-            decoration: null,
-            textAlign: TextAlign.center,
-            maxLength: 2, //Extra character for next symbol
-            onChanged: (String value) {
-              var parent = MyHomePage.of(context);   
-              if (parent != null)
-              {
-                parent.ChangeLetter(value, widget.clone_ind, widget.source);
-                parent.ChangeLetter(value, widget.word_ind, widget.let_ind);
-              }
-            },
-            inputFormatters: [
-              txt_format,
-            ],
-          ),),
-        )       
-      )
+          child: Center(
+            child: Stack(
+              alignment: AlignmentDirectional.center,
+              children: [
+                Text(
+                  letter,
+                  style: _biggerFont,
+                  textAlign: TextAlign.center,
+                ),
+                TextField(
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  enableIMEPersonalizedLearning: false,
+                  cursorColor: (myFocusNode.hasFocus)?sel_color:for_color,
+                  showCursor: false,
+                  // focusNode: myFocusNode,
+                  textInputAction: TextInputAction.next,
+                  controller: txt_controller,
+                  decoration: null,
+                  style: _biggerFont,
+                  textAlign: TextAlign.center,
+                  maxLength: 2, //Extra character for next symbol
+                  onChanged: (String value) {
+                    var parent = MyHomePage.of(context);
+                    if (parent != null)
+                    {
+                      parent.ChangeLetter(value, word_ind, let_ind);
+
+                      if (clone_ind != -1)
+                      {
+                        parent.ChangeLetter(value, clone_ind, clone_let_ind); //Изменение буквы в пересечении
+                      }
+                    }
+                    // if (!last)
+                    // {
+                    //   myFocusNode.nextFocus();
+                    // }
+                    // else
+                    // {
+                    //   myFocusNode.unfocus();
+                    // }
+                  },
+                  inputFormatters: [
+                    txt_format,
+                  ],
+                ),
+              ],
+            )   
+          ) 
+        )     
+      )  
     );
   }
 }
 
 // ReadOnlyCell - ячейка с неизменяемым содержимым, для случаев посторонних символов
-class ReadOnlyCell extends StatefulWidget { //Ячейка кроссворда
+class ReadOnlyCell extends StatelessWidget { //Ячейка кроссворда
   ReadOnlyCell({ Key? key, required this.last, this.letter:'A'}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
   final String letter;  //Буква на этом месте
-  @override
-  __ReadOnlyCellState createState() => __ReadOnlyCellState();
-}
-
-class __ReadOnlyCellState extends State<ReadOnlyCell> {
   final for_color = Colors.grey[200];
   final _biggerFont = TextStyle(fontSize: 40);
-  bool _focused = false;
-  FocusNode myFocusNode = FocusNode();
-
-  @override
-  void initState()
-  {
-    super.initState();
-    myFocusNode.addListener(() { 
-      setState(() {
-        if (myFocusNode.hasFocus != _focused) {
-          setState(() {
-            if (widget.last)
-            {
-              myFocusNode.unfocus();
-            }
-            else
-            {
-              myFocusNode.nextFocus();
-            }
-          });
-        }
-      });
-    });
-  }
-
-  @override
-  void dispose()
-  {
-    myFocusNode.dispose();
-    super.dispose();
-  }
+  var myFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -381,7 +204,7 @@ class __ReadOnlyCellState extends State<ReadOnlyCell> {
         child: InkWell(
           onFocusChange: (bool f) {
             if (f) {
-              if (widget.last)
+              if (last)
               {
                 myFocusNode.unfocus();
               }
@@ -393,7 +216,7 @@ class __ReadOnlyCellState extends State<ReadOnlyCell> {
           },
           child: Center(
             child: Text(
-              widget.letter,
+              letter,
               style: _biggerFont,
             ),
           )    

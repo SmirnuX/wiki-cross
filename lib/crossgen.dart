@@ -292,7 +292,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
     var positioned_words = <Positioned>[];  //Непосредственно виджеты слов, расположенные на поле
     for (var Field in field_words)
     {
-      word_inputs.add(CreateWord(Field, false));
+      word_inputs.add(CreateWord(Field, -1));
       positioned_words.add(Positioned(
         child: word_inputs.last,
         top: Field.y.toDouble() * 80,
@@ -322,25 +322,13 @@ class Gen_Crossword { //Сгенерированный кроссворд
     for (int i = 0; i < source.length; i++)
     {
       
-      word_inputs.add(CreateWord(source[i], i == word_ind));
-      if (i == word_ind)
-      {
-        continue; //пропуск подсвеченного слова
-      }
+      word_inputs.add(CreateWord(source[i], word_ind));
       positioned_words.add(Positioned(
         child: word_inputs.last,
         top: source[i].y.toDouble() * 80,
         left: source[i].x.toDouble() * 80,
       ));
     }
-    //Отрисовка подсвеченного слова
-    // word_inputs.add(CreateWord(source[word_ind], true));
-    positioned_words.add(Positioned(
-        child: word_inputs[word_ind],
-        top: source[word_ind].y.toDouble() * 80,
-        left: source[word_ind].x.toDouble() * 80,
-      ));
-
     return InteractiveViewer(
         minScale: 0.001,
         maxScale: 8.0,
@@ -350,33 +338,46 @@ class Gen_Crossword { //Сгенерированный кроссворд
           width: width.toDouble(),
           height: height.toDouble(),
           child: Stack(
-            //clipBehavior: Clip.none,
             children: positioned_words
             ),
         ) 
       );
   }
 
-  Word CreateWord(Field_Word field, bool word_highlight) //Добавление нового слова
+  Word CreateWord(Field_Word field, int word_highlight) //Добавление нового слова
   {
     //Наполнение слова
     var Cells = <Widget>[]; //Ячейки слова
     for (int i = 0; i < field.length; i++)
     {
-      //1. Проверка на пересечение
       bool is_created = false;
+      //1. Проверка на посторонние символы
+      if (field.word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
+      {
+        Cells.add(ReadOnlyCell(
+          last: i == field.length-1?true:false,
+          letter: field.word.substring(i, i+1),)
+        );
+        is_created = true;
+      }
+      //2. Проверка на пересечение   
       for (var inters in intersec)  //Создание пересечений
       {
+        if (is_created)
+        {
+          break;
+        }
         if (inters.word == field.num && i == inters.word_index)  //Добавляем виджет поверх. Бывшее место TransparentCell
         {
           Cells.add(CellCross(
             last: i == field.length-1?true:false, 
             clone_ind: inters.source,
             clone_let_ind: inters.source_index,
-            letter: '',
+            letter: field.in_word.substring(i, i+1) == '_'?' ':field.in_word.substring(i, i+1),
             let_ind: i,
             word_ind: field.num,
-            light_highlight: word_highlight,
+            light_highlight: field.num == word_highlight || inters.source == word_highlight,
+            pseudo_focused: field.highlighted == i,
           ));
           is_created = true;
         }
@@ -386,35 +387,26 @@ class Gen_Crossword { //Сгенерированный кроссворд
             last: i == field.length-1?true:false, 
             clone_ind: inters.word,
             clone_let_ind: inters.word_index,
-            letter: '',
+            letter: field.in_word.substring(i, i+1) == '_'?' ':field.in_word.substring(i, i+1),
             let_ind: i,
             word_ind: field.num,
-            light_highlight: word_highlight,
+            light_highlight: field.num == word_highlight || inters.word == word_highlight,
+            pseudo_focused: field.highlighted == i
           ));
           is_created = true;
         }
       }
       if (!is_created)
       {
-        if (field.word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
-        {
-          Cells.add(ReadOnlyCell(
-            last: i == field.length-1?true:false,
-            letter: field.word.substring(i, i+1),)
-          );
-        }
-        else
-        {
-          Cells.add(CellCross(  //Обычные ячейки
-            last: i == field.length-1?true:false,
-            letter: field.in_word.substring(i, i+1) == '_'?' ':field.in_word.substring(i, i+1),
-            let_ind: i,
-            word_ind: field.num,
-            pseudo_focused: field.highlighted == i,
-            light_highlight: word_highlight,
-            ),      
-          );
-        }
+        Cells.add(CellCross(  //Обычные ячейки
+          last: i == field.length-1?true:false,
+          letter: field.in_word.substring(i, i+1) == '_'?' ':field.in_word.substring(i, i+1),
+          let_ind: i,
+          word_ind: field.num,
+          pseudo_focused: field.highlighted == i,
+          light_highlight: field.num == word_highlight,
+          ),      
+        );
       }
     }
     var result = Word (
@@ -458,7 +450,6 @@ class Field_Word {  //Слово, расположенное на поле
     }
   }
   int highlighted = -1;
-  int toFocus = -1; //При создании слова необходимо сфокусироваться на определенной букве
   String word;  //Непосредственно само слово
   late String in_word; //Введенное слово
   String definition;  //Определение этого слова

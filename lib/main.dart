@@ -82,17 +82,12 @@ class MyHomePageState extends State<MyHomePage> {
 
   void ChangeFocus(bool value, int word_ind, int let_ind)
   {
+    if (!value && Words[word_ind].highlighted != let_ind)
+    {
+      return;
+    }
     Words[word_ind].highlighted = value?let_ind:-1;
-  }
-
-  void RequestFocus(int word_ind, int let_ind)
-  {
-    Words[word_ind].toFocus = let_ind;
-  }
-
-  void ChangeHighlight()
-  {
-    
+    print('change on ${let_ind+1}');
   }
 
   void ChangeLetter(String value, int word_ind, int let_ind)
@@ -105,6 +100,14 @@ class MyHomePageState extends State<MyHomePage> {
       else
       {
         Words[word_ind].in_word = Words[word_ind].in_word.replaceRange(let_ind, let_ind + 1, '_');
+      }
+      if (word_ind == chosen)
+      {
+        Words[word_ind].highlighted++;
+      }
+      if (Words[word_ind].highlighted > Words[word_ind].length)
+      {
+        Words[word_ind].highlighted = -1;
       }
       crossword.field_words.setAll(0, Words);
     });  
