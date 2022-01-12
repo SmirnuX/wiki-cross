@@ -115,6 +115,25 @@ class MyHomePageState extends State<MyHomePage> {
         Words[word_ind].highlighted = -1;
       }
       crossword.field_words.setAll(0, Words);
-    });  
+    }); 
+    checkForWin(); 
+  }
+
+  bool checkForWin()  //Проверка на выигрыш
+  {
+    bool win = true;
+    for (var word in Words)
+    {
+      if (word.word != word.in_word)
+      {
+        win = false;
+        break;
+      }
+    }
+    if (win)
+    {
+      print('=======ПОБЕДА========');
+    } 
+    return win;
   }
 }

@@ -239,7 +239,6 @@ class CellFormatter extends TextInputFormatter {  //Форматирование
       TextEditingValue oldValue,
       TextEditingValue newValue
       ) {
-        print('${oldValue}\n|||${newValue}');
         if (newValue.text.contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]"))) //Посторонние символы
         {
           return TextEditingValue();  //Сброс ячейки

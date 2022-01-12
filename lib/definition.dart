@@ -115,8 +115,10 @@ class _DefinitionState extends State<Definition> {
             child:FittedBox(
               fit: BoxFit.contain,
               alignment: Alignment.centerLeft,
-              child: Row (
-                children: res,
+              child: FocusTraversalGroup(
+                child: Row (
+                  children: res,
+                )
               ),   
             ),
           ),
@@ -234,6 +236,7 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
                       {
                         parent.ChangeLetter(value, clone_ind, clone_let_ind); //Изменение буквы в пересечении
                       }
+                      print('Main: $word_ind: $let_ind; \n Clone: $clone_ind: $clone_let_ind');
                     }
                   },
                   inputFormatters: [

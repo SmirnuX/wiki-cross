@@ -140,7 +140,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
     for (var inter in intersec)
     {
       field_words[inter.source].inters.add(Intersection(source: inter.source, source_index:inter.source_index, word: inter.word, word_index: inter.word_index));
-      field_words[inter.source].inters.add(Intersection(source: inter.word, source_index:inter.word_index, word: inter.source, word_index: inter.source_index));
+      field_words[inter.word].inters.add(Intersection(source: inter.word, source_index:inter.word_index, word: inter.source, word_index: inter.source_index));
     }
     //Перемещение левого верхнего угла поля в начало координат
     for (int i = 0; i < field_words.length; i++)
