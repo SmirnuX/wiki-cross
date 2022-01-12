@@ -315,7 +315,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
       );
   }
 
-  Widget ToWidgetsHighlight(int word_ind, int let_ind, List<Field_Word> source) //Последующая сборка кроссворда
+  Widget ToWidgetsHighlight(int word_ind, int let_ind, List<Field_Word> source) //Последующая сборка кроссворда (с указанием выбранного слова и ячейки)
   {
     var word_inputs = <Word>[]; //Виджеты слов
     var positioned_words = <Positioned>[];  //Виджеты слов, расположенные на поле

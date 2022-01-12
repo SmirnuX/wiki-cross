@@ -80,14 +80,18 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void ChangeFocus(bool value, int word_ind, int let_ind)
+  void ChangeFocus(bool value, int word_ind, int let_ind) //Подсветка ячейки
   {
     if (!value && Words[word_ind].highlighted != let_ind)
     {
       return;
     }
     Words[word_ind].highlighted = value?let_ind:-1;
-    print('change on ${let_ind+1}');
+  }
+
+  void ChangeTrueFocus(int word_ind, int let_ind)  //Запрос фокуса для ячейки
+  {
+    ChooseWord(word_ind, let_ind);
   }
 
   void ChangeLetter(String value, int word_ind, int let_ind)
@@ -151,36 +155,48 @@ class _DefinitionState extends State<Definition> {
 
   @override
   Widget build(BuildContext context) {
-    List<AutoSizeText> res = [];  //Непосредственно слово
+    List<ElevatedButton> res = [];  //Непосредственно слово
     if (widget.source != null)
     {
       for (int i = 0; i < widget.source!.length; i++)
       {
         if (widget.source!.word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
         {
-          res.add(AutoSizeText
-          (widget.source!.word.substring(i, i+1),
-            style: widget.Header_const_style,
-            maxFontSize: 30,
-            maxLines: 1,
-            wrapWords: false,
-            textAlign: TextAlign.left,
+          res.add( ElevatedButton(
+            onPressed: () {
+            }, 
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.white),),
+            child: AutoSizeText (
+              widget.source!.word.substring(i, i+1),
+              style: widget.Header_const_style,
+              maxFontSize: 30,
+              maxLines: 1,
+              wrapWords: false,
+              textAlign: TextAlign.left,
+            ),     
           ));
-
         }
         else
         {
           String letter = widget.source!.in_word.substring(i, i+1);
-          res.add(AutoSizeText
-          (letter==' '?'_':letter,
-            style: i==widget.index?widget.Header_focus_style:widget.Header_style,
-            maxFontSize: 30,
-            maxLines: 1,
-            wrapWords: false,
-            textAlign: TextAlign.left,
+          res.add( ElevatedButton(
+            onPressed: () {
+              var parent = MyHomePage.of(context);
+              if (parent != null)
+              {
+                parent.ChooseWord(widget.source!.num, i);
+                parent.ChangeTrueFocus(widget.source!.num, i);
+              }
+            }, 
+            child: AutoSizeText (
+              letter==' '?'_':letter,
+              style: i==widget.index?widget.Header_focus_style:widget.Header_style,
+              maxFontSize: 30,
+              maxLines: 1,
+              wrapWords: false,
+              textAlign: TextAlign.left,
+            ),     
           ));
-          
-          // result += letter==' '?'_':letter;
         }
         // result += ' ';
       }

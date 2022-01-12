@@ -14,6 +14,20 @@ class Word extends StatelessWidget {
   final Field_Word parent;
   final int index;
   final bool hor;
+
+  void Focus(int let_ind)
+  {
+    if (let_ind == -1)
+    {
+      return;
+    }
+    if (children[let_ind].runtimeType == CellCross)
+    {
+      CellCross child = children[let_ind] as CellCross;
+      child.myFocusNode.requestFocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget WordContainer;
@@ -56,11 +70,9 @@ class Word extends StatelessWidget {
       try
       {
         child.setHighlighted(value);
-        // print('Highlight');
       }
       on NoSuchMethodError 
       {
-        print('setHighlighted not found');
         return;
       }
     }
@@ -115,7 +127,6 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
         child: InkWell(
           focusNode: myFocusNode,
           onFocusChange: (bool f) {
-            print('Changed focus on ${word_ind}');
             var parent = MyHomePage.of(context);
             if (parent != null)
             {
@@ -138,7 +149,7 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
                   letter,
                   style: _biggerFont,
                   textAlign: TextAlign.center,
-                ),
+                ), 
                 TextField(
                   autocorrect: false,
                   enableSuggestions: false,
@@ -236,11 +247,12 @@ class _CellFormatter extends TextInputFormatter {  //Форматировани�
       TextEditingValue oldValue,
       TextEditingValue newValue
       ) {
+        print('${oldValue}\n|||${newValue}');
         if (newValue.text.contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]"))) //Посторонние символы
         {
           return TextEditingValue();  //Сброс ячейки
         }
-        if (newValue.text.length <= 1)
+        if (newValue.text.length <= 1)  //Если новая буква одна
         {
           if (newValue.composing != TextRange.empty || Platform.isWindows)
           {
@@ -267,7 +279,7 @@ class _CellFormatter extends TextInputFormatter {  //Форматировани�
             }
           return TextEditingValue(text:newValue.text.substring(0,1).toUpperCase()); //Возвращаем первую букву
         }
-        else
+        else  //Если новая буква в конце
         {
           if (!is_last)
             {
