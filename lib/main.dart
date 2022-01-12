@@ -6,11 +6,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:auto_size_text/auto_size_text.dart';
+
 import 'dart:io' show Platform;
 import 'cells.dart';
+
 import 'crossgen.dart';
 import 'test_words.dart';
+import 'definition.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +21,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -115,126 +116,5 @@ class MyHomePageState extends State<MyHomePage> {
       }
       crossword.field_words.setAll(0, Words);
     });  
-  }
-
-}
-
-class Definition extends StatefulWidget {
-  Definition({ Key? key, this.source, required this.index, required this.num}) : super(key: key);
-  Field_Word? source;
-  int index;
-  int num;
-  final TextStyle Header_style = const TextStyle(
-    fontSize: 30,
-    fontFamily: 'Arial'
-  );
-  final TextStyle Header_const_style = TextStyle(
-    fontSize: 30,
-    fontFamily: 'Arial',
-    color: Colors.grey[400],
-  );
-  final TextStyle Header_focus_style = TextStyle(
-    fontSize: 30,
-    fontFamily: 'Arial',
-    backgroundColor: Colors.lightGreen[300],
-  );
-
-  final TextStyle Definit_style = const TextStyle(
-    fontSize: 20
-  );
-  final Counter_style = const TextStyle(
-    color: Colors.black,
-    fontSize: 18,
-  );
-
-  @override
-  _DefinitionState createState() => _DefinitionState();
-}
-
-class _DefinitionState extends State<Definition> {
-
-  @override
-  Widget build(BuildContext context) {
-    List<ElevatedButton> res = [];  //Непосредственно слово
-    if (widget.source != null)
-    {
-      for (int i = 0; i < widget.source!.length; i++)
-      {
-        if (widget.source!.word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
-        {
-          res.add( ElevatedButton(
-            onPressed: () {
-            }, 
-            style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.white),),
-            child: AutoSizeText (
-              widget.source!.word.substring(i, i+1),
-              style: widget.Header_const_style,
-              maxFontSize: 30,
-              maxLines: 1,
-              wrapWords: false,
-              textAlign: TextAlign.left,
-            ),     
-          ));
-        }
-        else
-        {
-          String letter = widget.source!.in_word.substring(i, i+1);
-          res.add( ElevatedButton(
-            onPressed: () {
-              var parent = MyHomePage.of(context);
-              if (parent != null)
-              {
-                parent.ChooseWord(widget.source!.num, i);
-                parent.ChangeTrueFocus(widget.source!.num, i);
-              }
-            }, 
-            child: AutoSizeText (
-              letter==' '?'_':letter,
-              style: i==widget.index?widget.Header_focus_style:widget.Header_style,
-              maxFontSize: 30,
-              maxLines: 1,
-              wrapWords: false,
-              textAlign: TextAlign.left,
-            ),     
-          ));
-        }
-        // result += ' ';
-      }
-    }
-    return Card(
-      margin: const EdgeInsets.all(4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(  //Номер слова
-            margin: const EdgeInsets.fromLTRB(15, 10, 15, 5),
-            child: Chip( 
-              label:Text(
-                (widget.source==null)?'':'${widget.source!.num+1}/${widget.num}',
-                style: widget.Counter_style,
-              )
-            )
-          ),
-          Container(  //Само слово
-            child: Row (
-              children: res,
-            ),
-            margin: const EdgeInsets.fromLTRB(15, 5, 15, 5),
-          ),
-          const Divider(
-          ),
-          Container(  //Определение слова
-            child:AutoSizeText(
-              (widget.source==null)?'':widget.source!.definition,
-              style: widget.Definit_style,
-              maxLines: 5, 
-            ),
-            margin: const EdgeInsets.all(10),
-          ),
-        ]
-      )  
-    );
   }
 }

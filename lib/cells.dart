@@ -102,7 +102,7 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
   final sel_color = Colors.green[100]; //Цвет выбранной ячейки
   final light_color = Colors.lightGreen[50];  //Подсветка всего слова
   final _biggerFont = const TextStyle(fontSize: 40);
-  late _CellFormatter txt_format = _CellFormatter(node:myFocusNode, is_last:last);
+  late CellFormatter txt_format = CellFormatter(node:myFocusNode, is_last:last);
 
   var myFocusNode = FocusNode();
 
@@ -174,14 +174,6 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
                         parent.ChangeLetter(value, clone_ind, clone_let_ind); //Изменение буквы в пересечении
                       }
                     }
-                    // if (!last)
-                    // {
-                    //   myFocusNode.nextFocus();
-                    // }
-                    // else
-                    // {
-                    //   myFocusNode.unfocus();
-                    // }
                   },
                   inputFormatters: [
                     txt_format,
@@ -237,8 +229,8 @@ class ReadOnlyCell extends StatelessWidget { //Ячейка кроссворда
   }
 }
 
-class _CellFormatter extends TextInputFormatter {  //Форматирование текста в ячейках
-  _CellFormatter ({ required this.node, required this.is_last});
+class CellFormatter extends TextInputFormatter {  //Форматирование текста в ячейках
+  CellFormatter ({ required this.node, required this.is_last});
   FocusNode node;
   final bool is_last;
 

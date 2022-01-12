@@ -136,6 +136,12 @@ class Gen_Crossword { //Сгенерированный кроссворд
       }
     }
     word_count = field_words.length;
+    //Добавление пересечений в каждое слово
+    for (var inter in intersec)
+    {
+      field_words[inter.source].inters.add(Intersection(source: inter.source, source_index:inter.source_index, word: inter.word, word_index: inter.word_index));
+      field_words[inter.source].inters.add(Intersection(source: inter.word, source_index:inter.word_index, word: inter.source, word_index: inter.source_index));
+    }
     //Перемещение левого верхнего угла поля в начало координат
     for (int i = 0; i < field_words.length; i++)
     {
@@ -457,6 +463,7 @@ class Field_Word {  //Слово, расположенное на поле
   int num;  //Номер слова
   late int length; //Длина слова
   bool hor; //Горизонтально ли расположено слово
+  List <Intersection> inters = []; //Пересечения
 }
 
 class Intersection {  //Класс для обозначения пересечений
