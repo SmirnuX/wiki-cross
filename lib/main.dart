@@ -11,7 +11,6 @@ import 'dart:io' show Platform;
 import 'cells.dart';
 
 import 'crossgen.dart';
-import 'test_words.dart';
 import 'definition.dart';
 import 'wiki.dart' as Wiki;
 
@@ -19,25 +18,55 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  State<MyApp> createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp>
+{
+  late Future<List<Gen_Word>> pool;
+
+  @override
+  void initState()
+  {
+    pool = Wiki.RequestPool('https://ru.wikipedia.org/wiki/Special:Random', 30, 3);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Proto WikiCross',
+      title: 'Wiki Crossword',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         primaryColor: Colors.tealAccent[100],
       ),
-      home: MyHomePage(title: 'Proto WikiCross'),
-    );
+      home: FutureBuilder(
+        future: pool,
+        builder:(BuildContext context, AsyncSnapshot<List<Gen_Word>> snapshot) {
+          if (snapshot.hasData)
+          {
+            return MyHomePage(title: 'Alpha WikiCross', words: snapshot.data);
+          }
+          else if (snapshot.hasError)
+          {
+            return Text('Error!');
+          }
+          else
+          {
+            return CircularProgressIndicator();
+          } 
+        }
+    )
+    ); 
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({UniqueKey? key, required this.title}) : super(key: key);
+  MyHomePage({UniqueKey? key, required this.title, required this.words}) : super(key: key);
   final String title;
+  List <Gen_Word>? words;
   
   @override
   State<MyHomePage> createState() => MyHomePageState();
@@ -57,8 +86,7 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState()
   {
-    Wiki.RequestPage('https://ru.wikipedia.org/wiki/Special:Random');
-    crossword = Gen_Crossword(test_words_set.Get(), 10);
+    crossword = Gen_Crossword(widget.words!, 10);
     Words = crossword.GetWordList();
   }
 

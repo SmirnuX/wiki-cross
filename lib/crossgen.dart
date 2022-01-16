@@ -62,7 +62,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
     words.sort((a,b) => b.weight.compareTo(a.weight));
     //1. Выбираем случайно одно из первого буфера слов
     Random rng = Random();
-    int buffer = 5;
+    int buffer = 5; //Первые слова - выбираются из топ 5 слов
     int ind = rng.nextInt(buffer);
     bool first_hor = rng.nextBool();
     field_words.add(Field_Word(hor: first_hor, word: words[ind].word, x: 0, y: 0, num: 0, definition:words[ind].definition));
@@ -70,8 +70,8 @@ class Gen_Crossword { //Сгенерированный кроссворд
     words.removeAt(ind);
     //2. Постепенный выбор новых слов и попытка их вставить в кроссворд
     bool dead_end = false;
-    int target_words = 10;
-    while (!dead_end && field_words.length < target_words)
+    int tries = 0;
+    while (!dead_end && field_words.length < target)
     {
       buffer = buffer < words.length ? buffer + 1 : words.length; 
       if (words.isEmpty)
@@ -132,7 +132,11 @@ class Gen_Crossword { //Сгенерированный кроссворд
       }
       if (!word_added)
       {
-        dead_end = true;
+        tries++;
+        if (tries > 10)
+        {
+          dead_end = true;
+        }
       }
     }
     word_count = field_words.length;

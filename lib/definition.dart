@@ -16,12 +16,12 @@ class Definition extends StatefulWidget {
   );
   final TextStyle Header_const_style = TextStyle(
     fontSize: 30,
-    fontFamily: 'Arial',
+    fontFamily: 'TimesNewRoman',
     color: Colors.grey[400],
   );
   final TextStyle Header_focus_style = TextStyle(
     fontSize: 30,
-    fontFamily: 'Arial',
+    fontFamily: 'TimesNewRoman',
     backgroundColor: Colors.lightGreen[300],
   );
 
@@ -164,7 +164,7 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
   );
   final TextStyle Header_const_style = TextStyle(
     fontSize: 30,
-    fontFamily: 'Arial',
+    fontFamily: 'TimesNewRoman',
     color: Colors.grey[400],
   );
 
@@ -236,7 +236,6 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
                       {
                         parent.ChangeLetter(value, clone_ind, clone_let_ind); //Изменение буквы в пересечении
                       }
-                      print('Main: $word_ind: $let_ind; \n Clone: $clone_ind: $clone_let_ind');
                     }
                   },
                   inputFormatters: [
