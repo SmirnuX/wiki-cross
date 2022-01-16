@@ -13,6 +13,7 @@ import 'cells.dart';
 import 'crossgen.dart';
 import 'test_words.dart';
 import 'definition.dart';
+import 'wiki.dart' as Wiki;
 
 void main() {
   runApp(const MyApp());
@@ -56,6 +57,7 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState()
   {
+    Wiki.RequestPage('https://en.wikipedia.org/wiki/Scopula_omnisona');
     crossword = Gen_Crossword(test_words_set.Get(), 10);
     Words = crossword.GetWordList();
   }
