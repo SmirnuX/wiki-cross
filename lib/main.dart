@@ -57,7 +57,7 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState()
   {
-    Wiki.RequestPage('https://en.wikipedia.org/wiki/Scopula_omnisona');
+    Wiki.RequestPage('https://ru.wikipedia.org/wiki/Special:Random');
     crossword = Gen_Crossword(test_words_set.Get(), 10);
     Words = crossword.GetWordList();
   }
