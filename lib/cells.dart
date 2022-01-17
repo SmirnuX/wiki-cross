@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 
 import 'package:wiki_cross/crossgen.dart';
-import 'main.dart';
+import 'crossword.dart';
 
 class Word extends StatelessWidget {
   const Word ({ Key? key, required this.hor, required this.children, required this.parent, required this.index}) : super(key: key);

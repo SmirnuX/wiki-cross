@@ -133,6 +133,7 @@ WikiPage ParseRequest(http.Response response, bool search_links) //Обрабо�
   }
   if (priority)
   {
+    header = header.toUpperCase();
     print(header);
   }
 
@@ -232,12 +233,12 @@ String RemoveTags (String source, String title) //Удаление HTML-тего
   if (title != '')  //Удаление искомого слова из определения
   {
     int start_index = 0;
-    String firstLetter = title.substring(0, 1).toLowerCase();
-    while ((result.contains(firstLetter, start_index) || result.contains(firstLetter.toUpperCase(), start_index)) )
+    String firstLetter = title.substring(0, 1); //Первая буква слова
+    while ((result.contains(firstLetter, start_index) || result.contains(firstLetter.toLowerCase(), start_index)) )
     {
-      if (result.contains(title.substring(1), start_index + 1))
+      if (result.contains(title.toLowerCase().substring(1), start_index + 1))
       {
-        start_index = result.indexOf(title.substring(1), start_index + 1);
+        start_index = result.indexOf(title.toLowerCase().substring(1), start_index + 1);
         start_index--;
         result = result.replaceRange(start_index, start_index+title.length, '________');
       }

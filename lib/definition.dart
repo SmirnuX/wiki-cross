@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'main.dart';
+import 'crossword.dart';
 import 'crossgen.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'cells.dart';
