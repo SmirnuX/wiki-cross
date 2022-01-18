@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:wiki_cross/crossgen.dart';
 import 'dart:convert' as convert;
 
+import 'package:wiki_cross/parser.dart';
+
 class WikiPage  //Страница с Википедии
 {
   WikiPage({required this.title, required this.content, required this.links, required this.priority});
@@ -69,7 +71,15 @@ Future<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
       throw Error('Something went wrong ;( (HTTP code: ${(await response).statusCode}');
     }
     var new_page = ParseRequest(await response, false); 
-    if (new_page.priority)  //Если новая страница подходит для включения в кроссворд
+    bool add = true;
+    for (var p in result)
+    {
+      if (p.word == new_page.title)
+      {
+        add = false;
+      }
+    }
+    if (new_page.priority && add)  //Если новая страница подходит для включения в кроссворд
     {
       var new_word = Gen_Word(word: new_page.title, weight: 0, definition: new_page.content);
       result.add(new_word);
@@ -153,7 +163,7 @@ WikiPage ParseRequest(http.Response response, bool search_links) //Обрабо�
     content_start += 3; //Пропуск тега
     int content_end = content_w_tag.indexOf('</p>', content_start); 
     content = content_w_tag.substring(content_start, content_end);  //Строка, начинающаяся с тега названия
-    content = RemoveTags(content, header);
+    content = CleanText(content, header);
     //Оптимальная длина составляет около 200 символов.
     content = TrimContent(content, 300);
     print(content);

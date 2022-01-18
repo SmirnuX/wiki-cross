@@ -3,7 +3,7 @@
 import 'dart:math';
 import 'package:characters/characters.dart';
 
-String ClearText (String source, String title)  //Удаление HTML-тегов, сносок, нечитаемых символов и т.д.
+String CleanText (String source, String title)  //Удаление HTML-тегов, сносок, нечитаемых символов и т.д.
 {
   /* Необходимо убрать:
   + Все, что находится в круглых, квадратных и треугольных скобках,
@@ -12,8 +12,8 @@ String ClearText (String source, String title)  //Удаление HTML-тего
   + Убрать &amp;, &nbsp; - заменить на их эквиваленты
   + \u0301 - символ ударения
   + Заменить большое тире на маленькие
-  - Необходимо убрать из определения описываемое слово (? возможно, если таких слов в определении нет - убрать это слово)
-  - Убрать двойные пробелы
+  + Необходимо убрать из определения описываемое слово (? возможно, если таких слов в определении нет - убрать это слово)
+  + Убрать двойные пробелы
   + Убрать пробелы в начале и в конце
   - Убрать пробелы вокруг тире (типа a - b на a-b) (только для названия)
   - Убрать кавычки вокруг названия
@@ -33,8 +33,9 @@ String ClearText (String source, String title)  //Удаление HTML-тего
     '&sect;'  : '§',
     '&#167;'  : '§',
     '&#8470;' : '№',
-    '&#91;'   : '[',
-    '&#93;'   : ']'
+    // '&#91;'   : '[',
+    // '&#93;'   : ']',
+    '&nbsp;'  : ' '
   };
   Map<String, String> symbols = {
     '—' : '-',
@@ -75,7 +76,14 @@ String ClearText (String source, String title)  //Удаление HTML-тего
         }
         if (iter.current == '#')  //Если это точно специальный символ
         {
-          if (!iter.moveTo(Characters(';'))) //Передвигаемся к концу специального символа
+          if (iter.isFollowedBy(Characters('91;')))  //Если это квадратная скобка с неправильным кодированием
+          {
+            if (!iter.moveTo(Characters('&#93;'))) //Если не найдена завершающая скобка
+            {
+              break;
+            }
+          }
+          else if (!iter.moveTo(Characters(';'))) //Передвигаемся к концу специального символа
           {
             break;  //Если конец строки
           }
@@ -114,12 +122,14 @@ String ClearText (String source, String title)  //Удаление HTML-тего
   String final_result = '';
   int word_meet = 0;  //Количество вхождений искомого слова в определение
   double target_delta = 3;  //Количество букв, которое может не совпадать в двух словах
+  int word_len = 0;
   while(second_iter.moveNext()) //Второй проход - удаление двойных пробелов, удаление из определения искомого слова
   {
     if (second_iter.current == ' ')
     {
       final_result+=' ';
       second_iter.expandWhile((p0) => p0==' '); //Поиск всех пробелов
+      word_len = 0; //Обнуление длины слова
     }
     else if (title == '')
     {
@@ -134,7 +144,7 @@ String ClearText (String source, String title)  //Удаление HTML-тего
         String tmp = "_";
         var word_iter = second_iter.copy();
         word_iter.moveUntil(Characters(' ')); //Получаем все слово
-        for (int i = 0; i < word_iter.current.length; i++)
+        for (int i = 0; i < word_iter.current.length; i++)  //Сравнение слов
         {
           var letter = title.substring(title_index, title_index+1);
           if (word_iter.current.substring(i, i+1) == letter || word_iter.current.substring(i, i+1) == letter.toLowerCase())
@@ -153,7 +163,8 @@ String ClearText (String source, String title)  //Удаление HTML-тего
             uneq_count++;
           }
         }
-        if (uneq_count < 3 || uneq_count.toDouble()/(word_iter.current.length+1) < 0.1) //Несовпадающих символов меньше трех, либо их процент меньше 10 процентов
+        uneq_count+= title.length - title_index;
+        if (uneq_count < 3 || uneq_count.toDouble()/(word_iter.current.length+1+word_len) < 0.1) //Несовпадающих символов меньше трех, либо их процент меньше 10 процентов
         {
           final_result += tmp;
         }
@@ -162,6 +173,11 @@ String ClearText (String source, String title)  //Удаление HTML-тего
           final_result += second_iter.current + word_iter.current;
         }
         second_iter = word_iter;
+      }
+      else
+      {
+        final_result += second_iter.current;
+        word_len++;
       }
     }
     
