@@ -80,7 +80,7 @@ class Word extends StatelessWidget {
 }
 
 class CellCross extends StatelessWidget { //Ячейка кроссворда
-  CellCross({ Key? key, required this.last, this.letter:'A', this.pseudo_focused:false, required this.let_ind, required this.word_ind, required this.light_highlight, this.clone_ind = -1, this.clone_let_ind = -1}) : super(key: key);
+  CellCross({ Key? key, required this.last, this.letter='A', this.pseudo_focused=false, required this.let_ind, required this.word_ind, required this.light_highlight, this.clone_ind = -1, this.clone_let_ind = -1}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
 
   final int let_ind;  //Индекс буквы
@@ -189,11 +189,11 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
 
 // ReadOnlyCell - ячейка с неизменяемым содержимым, для случаев посторонних символов
 class ReadOnlyCell extends StatelessWidget { //Ячейка кроссворда
-  ReadOnlyCell({ Key? key, required this.last, this.letter:'A'}) : super(key: key);
+  ReadOnlyCell({ Key? key, required this.last, this.letter='A'}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
   final String letter;  //Буква на этом месте
   final for_color = Colors.grey[200];
-  final _biggerFont = TextStyle(fontSize: 40);
+  final _biggerFont = const TextStyle(fontSize: 40);
   var myFocusNode = FocusNode();
 
   @override
@@ -240,7 +240,7 @@ class CellFormatter extends TextInputFormatter {  //Форматирование
       ) {
         if (newValue.text.contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]"))) //Посторонние символы
         {
-          return TextEditingValue();  //Сброс ячейки
+          return const TextEditingValue();  //Сброс ячейки
         }
         if (newValue.text.length <= 1)  //Если новая буква одна
         {

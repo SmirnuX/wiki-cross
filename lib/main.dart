@@ -13,7 +13,7 @@ import 'cells.dart';
 import 'crossgen.dart';
 import 'crossword.dart';
 import 'definition.dart';
-import 'wiki.dart' as Wiki;
+import 'wiki.dart' as wiki;
 
 void main() {
   runApp(MaterialApp(
@@ -44,28 +44,28 @@ class SearchRoute extends StatelessWidget //Страница поиска
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             ElevatedButton(
-              child: Text('🎲 Cлучайная статья 🇷🇺'),
+              child: const Text('🎲 Cлучайная статья 🇷🇺'),
               onPressed: () 
               {
                 Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/Special:Random');
               }
             ),
             ElevatedButton(
-              child: Text('🎲 Cлучайная статья 🇺🇸'),
+              child: const Text('🎲 Cлучайная статья 🇺🇸'),
               onPressed: () 
               {
                 Navigator.pushNamed(context, '/crossword', arguments: 'https://en.wikipedia.org/wiki/Special:Random');
               }
             ),
             ElevatedButton(
-              child: Text('🔍 Поиск'),
+              child: const Text('🔍 Поиск'),
               onPressed: () 
               {
                 Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/Flutter');
               }
             ),
             ElevatedButton(
-              child: Text('🐻 Тема "Животные"'),
+              child: const Text('🐻 Тема "Животные"'),
               onPressed: () 
               {
                 Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/%D0%96%D0%B8%D0%B2%D0%BE%D1%82%D0%BD%D1%8B%D0%B5'); 

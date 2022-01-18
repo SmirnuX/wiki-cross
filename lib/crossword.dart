@@ -1,7 +1,9 @@
 //Страница, на которой отображается кроссворд
 
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
-import 'wiki.dart' as Wiki;
+import 'wiki.dart' as wiki;
 import 'crossgen.dart';
 import 'definition.dart';
 
@@ -20,9 +22,9 @@ class CrosswordRouteState extends State<CrosswordRoute>
   @override
   void initState()
   {
-    pool = Wiki.RequestPool(widget.url, 30, 3);
+    pool = wiki.RequestPool(widget.url, 30, 3);
   }
-
+  //Поиск по Википедии: https://en.wikipedia.org/wiki/Special:Search?search=
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -49,8 +51,8 @@ class CrosswordRouteState extends State<CrosswordRoute>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    CircularProgressIndicator(),
-                    Text('Загрузка...'),
+                    const CircularProgressIndicator(),
+                    const Text('Загрузка...'),
                   ],
                 )
               ),
