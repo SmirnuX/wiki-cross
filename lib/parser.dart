@@ -78,10 +78,7 @@ String CleanText (String source, String title)  //Удаление HTML-тего
         {
           if (iter.isFollowedBy(Characters('91;')))  //Если это квадратная скобка с неправильным кодированием
           {
-            if (!iter.moveTo(Characters('&#93;'))) //Если не найдена завершающая скобка
-            {
-              break;
-            }
+            iter = PassBrackets(iter);
           }
           else if (!iter.moveTo(Characters(';'))) //Передвигаемся к концу специального символа
           {
@@ -97,11 +94,7 @@ String CleanText (String source, String title)  //Удаление HTML-тего
     }
     else if (braces.keys.contains(iter.current))  //Если это начало скобки
     {
-      var end_bracket = braces[iter.current]; //Завершающая скобка
-      if (!iter.moveTo(Characters(end_bracket!))) //Если не найдена завершающая скобка
-      {
-        break;
-      }
+      iter = PassBrackets(iter);
     }
     else if (symbols.keys.contains(iter.current))  //Если это один из заменяемых/удаляемых символов
     {
@@ -127,8 +120,16 @@ String CleanText (String source, String title)  //Удаление HTML-тего
   {
     if (second_iter.current == ' ')
     {
-      final_result+=' ';
       second_iter.expandWhile((p0) => p0==' '); //Поиск всех пробелов
+      if (!second_iter.moveNext())
+      {
+        break;
+      }
+      if (second_iter.current != '.' && second_iter.current != ',' && second_iter.current != '!' && second_iter.current != '?')
+      {
+        final_result+=' ';
+      }
+      second_iter.moveBack();
       word_len = 0; //Обнуление длины слова
     }
     else if (title == '')
@@ -182,8 +183,63 @@ String CleanText (String source, String title)  //Удаление HTML-тего
     }
     
   }
-
-
   final_result = final_result.trim();
   return final_result;
+}
+
+CharacterRange PassBrackets(CharacterRange original)  //Пропуск скобок
+{
+  List<String> braces_start = ['<', '(', '[' ]; //'&#91;'
+  List<String> braces_end = ['>', ')', ']',  ]; //'&#93;'
+  int depth = 1;  //Глубина вложенности
+  while (original.moveNext(1))
+  {
+    if (original.startsWith(Characters('&')))
+    {
+      if (!original.moveNext(4))
+      {
+        original.moveBackTo(Characters('&'));
+      }
+      else if (original.current == '#91;')
+      {
+        depth++;
+      }
+      else if (original.current == '#93;')
+      {
+        depth--;
+        if (depth <= 0)
+        {
+          return original;
+        }
+      }
+      else
+      {
+        original.moveBackTo(Characters('&'));
+      }
+      continue;
+    }
+
+    for(var a in braces_start)
+    {
+      if (original.startsWith(Characters(a)))
+      {
+        depth++;
+        break;
+      }
+    }
+    for(var a in braces_end)
+    {
+      if (original.startsWith(Characters(a)))
+      {
+        depth--;
+        if (depth <= 0)
+        {
+          return original;
+        }
+        break;
+      }
+    }
+  }
+  print('return cause of end');
+  return original;
 }

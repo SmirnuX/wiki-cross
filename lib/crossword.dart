@@ -49,7 +49,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
             return Scaffold(
               body: Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const CircularProgressIndicator(),
                     const Text('Загрузка...'),

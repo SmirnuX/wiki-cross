@@ -73,13 +73,13 @@ void main() {
   });
 
   test('Проверка удаления сносок с другим кодированием', () {
-    String input = 'Google Base - база данных, созданная компанией Google в ноябре 2005 года&#91;1&#93;&#91;2&#93;.';
+    String input = 'Google Base - база данных, созданная компанией Google в ноябре 2005 &#91;1&#93; года &#91;2&#93;.';
     String output = 'Google ____ - база данных, созданная компанией Google в ноябре 2005 года.';
 
     expect(CleanText(input, 'BASE'), output);
   });
 
-    test('Проверка форматирования статей с Википедии [0]', () {
+  test('Проверка форматирования статей с Википедии [0]', () {
     String input = '<p><b>Чарльз Теннант</b> (<a href="/wiki/%D0%90%D0%BD%D0%B3%D0%BB%D0%B8%D0%B9%D1%81%D0%BA%D0%B8%D0%B9_%D1%8F%D0%B7%D1%8B%D0%BA" title="Английский язык" wotsearchprocessed="true">англ.</a>&nbsp;<span lang="en" style="font-style:italic;">Charles Tennant</span>; <span class="nowrap"><span data-wikidata-property-id="P569" class="no-wikidata"><a href="/wiki/3_%D0%BC%D0%B0%D1%8F" title="3 мая" wotsearchprocessed="true">3&nbsp;мая</a> <a href="/wiki/1768_%D0%B3%D0%BE%D0%B4" title="1768 год" wotsearchprocessed="true">1768</a></span><span class="noprint" style="display:none"> (<span class="bday">1768-05-03</span>)</span></span>&nbsp;— <span data-wikidata-property-id="P570" class="no-wikidata"><a href="/wiki/1_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F" title="1 октября" wotsearchprocessed="true">1 октября</a> <a href="/wiki/1838_%D0%B3%D0%BE%D0%B4" title="1838 год" wotsearchprocessed="true">1838</a></span>)&nbsp;— британский химик и предприниматель.</p>';
     String output = 'Чарльз _______ - британский химик и предприниматель.';
     expect(CleanText(input, 'ТЕННАНТ'), output);
