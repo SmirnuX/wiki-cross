@@ -10,7 +10,7 @@ import 'definition.dart';
 
 class CrosswordRoute extends StatefulWidget {
   CrosswordRoute({Key? key, required this.url}) : super(key: key);
-
+  int pool_size = 30;
   String url;
   State<CrosswordRoute> createState() => CrosswordRouteState();
 }
@@ -22,7 +22,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
   @override
   void initState()
   {
-    pool = wiki.RequestPool(widget.url, 30, 3);
+    pool = wiki.RequestPool(widget.url, widget.pool_size, 3);
   }
   //Поиск по Википедии: https://en.wikipedia.org/wiki/Special:Search?search=
   @override

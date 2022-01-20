@@ -34,46 +34,106 @@ void main() {
   ));
 }
 
-class SearchRoute extends StatelessWidget //Страница поиска
+class SearchRoute extends StatefulWidget //Страница поиска
 {
+  final TextStyle _bigger = const TextStyle(
+    fontSize: 20,
+
+  );
+  State<SearchRoute> createState() => _SearchRouteState();
+}
+
+class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStateMixin
+{
+  late TabController tab_controller;
+
+  @override
+  void initState() {
+    super.initState();
+    tab_controller = TabController(length: 3, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-              child: const Text('🎲 Cлучайная статья 🇷🇺'),
-              onPressed: () 
-              {
-                Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/Special:Random');
-              }
+      appBar: AppBar(
+        bottom: TabBar
+        (
+          controller: tab_controller,
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.search),
             ),
-            ElevatedButton(
-              child: const Text('🎲 Cлучайная статья 🇺🇸'),
-              onPressed: () 
-              {
-                Navigator.pushNamed(context, '/crossword', arguments: 'https://en.wikipedia.org/wiki/Special:Random');
-              }
+            Tab(
+              icon: Icon(Icons.casino_outlined),
             ),
-            ElevatedButton(
-              child: const Text('🔍 Поиск'),
-              onPressed: () 
-              {
-                Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/Flutter');
-              }
+            Tab(
+              icon: Icon(Icons.photo_size_select_actual_rounded),
             ),
-            ElevatedButton(
-              child: const Text('🐻 Тема "Животные"'),
-              onPressed: () 
-              {
-                Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/%D0%96%D0%B8%D0%B2%D0%BE%D1%82%D0%BD%D1%8B%D0%B5'); 
-              }
+          ],
+        ) 
+      ),
+      body: TabBarView(
+        controller: tab_controller,
+        children:[
+          Center( //Поиск
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //https://ru.wikipedia.org/w/api.php?action=opensearch&search=lego&limit=1&namespace=0&format=json
+                ElevatedButton(
+                  child: const Text('🔍 Поиск'),
+                  onPressed: () 
+                  {
+                    Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/Flutter');
+                  }
+                ),
+                ElevatedButton(
+                  child: const Text('🐻 Тема "Животные"'),
+                  onPressed: () 
+                  {
+                    Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/%D0%96%D0%B8%D0%B2%D0%BE%D1%82%D0%BD%D1%8B%D0%B5'); 
+                  }
+                ),
+              ]
+            )
+          ),
+          Center( //Случайная статья  
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ElevatedButton(
+                    child: Padding(
+                      padding: EdgeInsets.all(6), 
+                      child: Text('🎲 Cлучайная статья 🇷🇺', style: widget._bigger,),
+                    ),
+                    onPressed: () 
+                    {
+                      Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/Special:Random');
+                    }
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ElevatedButton(
+                    child: Padding(
+                      padding: EdgeInsets.all(6), 
+                      child: Text('🎲 Cлучайная статья 🇺🇸', style: widget._bigger,),
+                    ),
+                    onPressed: () 
+                    {
+                      Navigator.pushNamed(context, '/crossword', arguments: 'https://en.wikipedia.org/wiki/Special:Random');
+                    }
+                  ),
+                ),
+              ],
             ),
-          ]
-        )
-      )
+          ),
+          Text('Темы')  //Темы
+        ]
+      ) 
     );
   }
 }

@@ -37,6 +37,7 @@ Future<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
   }
   var original_page = ParseRequest(got_response, true); //Парсинг статьи
   List <String> pool = [];  //Пул ссылок на статьи, из которых будет выбираться целевое количество слов
+  print(original_page.links.length);
   pool.addAll(original_page.links);
   pool.shuffle();
   //1. Выбираем случайные статьи, ссылки с которых также добавятся в пул
@@ -49,9 +50,11 @@ Future<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
       throw Error('Something went wrong ;( (HTTP code: ${(await response).statusCode}');
     }
     var new_page = ParseRequest(await response, true);
+    print(new_page.links.length);
     pool.addAll(new_page.links);
   }
   pool.shuffle();
+  print('TOTAL - ${pool.length}');
   //2. Выбираем из пула окончательный пул
   List <String> final_pool = [];  //Окончательный пул
   final_pool.add(url);  //Добавляем оригинальную страницу, чтобы он не вошел в итоговый кроссворд
@@ -134,17 +137,21 @@ WikiPage ParseRequest(http.Response response, bool search_links) //Обрабо�
       priority = false;
     }
   }
+  int st_index = header.indexOf(RegExp(r"[a-zA-Zа-яА-ЯёЁ]"));
+  int end_index = header.lastIndexOf(RegExp(r"[a-zA-Zа-яА-ЯёЁ]"));
+  if (st_index == -1 || end_index == st_index)
+  {
+    priority = false;
+  }
   else
   {
-    if (header.length >= 20 && header.length <= 1)
+    header = header.substring(st_index, end_index+1);
+    if (header.length >= 20 || header.length <= 2)
     {
       priority = false;
     }
   }
-  if (header.endsWith(','))
-  {
-    header.replaceRange(header.length-2, null, ''); //Удаление последней запятой
-  }
+
   if (priority)
   {
     header = header.toUpperCase();
