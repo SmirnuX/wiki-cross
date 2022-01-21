@@ -24,7 +24,7 @@ class WikiPage  //Страница с Википедии
   bool priority;  //Приоритет слова - если низкий, то слово не будет включаться само по себе, а будут использоваться только для рекурсивного поиска
 }
 
-Future<List <Gen_Word>> RequestPool(String url, int target, int recursive_target) async  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
+Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
 {
   List <Gen_Word> result = [];
   http.Client client = http.Client(); //Создание клиента для удобства нескольких запросов
@@ -87,6 +87,7 @@ Future<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
       var new_word = Gen_Word(word: new_page.title, weight: 0, definition: new_page.content);
       result.add(new_word);
       final_pool.add(pool[i]);
+      yield result;
     }
     else
     {
@@ -100,7 +101,7 @@ Future<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
     throw Error('Something went wrong ;( (Couldn\'t get words from this article).');
   }
   client.close();
-  return result;
+  // return result;
 }
 
 WikiPage ParseRequest(http.Response response, bool search_links) //Обработать страницу с Википедии

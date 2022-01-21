@@ -17,7 +17,7 @@ class CrosswordRoute extends StatefulWidget {
 
 class CrosswordRouteState extends State<CrosswordRoute>
 {
-  late Future<List<Gen_Word>> pool;
+  late Stream<List<Gen_Word>> pool;
 
   @override
   void initState()
@@ -33,16 +33,30 @@ class CrosswordRouteState extends State<CrosswordRoute>
         primarySwatch: Colors.blue,
         primaryColor: Colors.tealAccent[100],
       ),
-      home: FutureBuilder(
-        future: pool,
+      home: StreamBuilder(  //TODO - добавить анимации
+        stream: pool,
         builder:(BuildContext context, AsyncSnapshot<List<Gen_Word>> snapshot) {
-          if (snapshot.hasData)
+          if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
           {
             return MyHomePage(title: 'Alpha WikiCross', words: snapshot.data);
           }
           else if (snapshot.hasError)
           {
-            return Text('Error!');
+            return Text('Error!');  //TODO - нормальное окно ошибки
+          }
+          else if (snapshot.connectionState == ConnectionState.active)
+          {
+            return Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    Text('Загрузка... ${snapshot.data!.length}/${widget.pool_size}'),
+                  ],
+                )
+              ),
+            );     
           }
           else
           {
@@ -52,12 +66,12 @@ class CrosswordRouteState extends State<CrosswordRoute>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const CircularProgressIndicator(),
-                    const Text('Загрузка...'),
+                    Text('Загрузка... 0/${widget.pool_size}'),
                   ],
                 )
               ),
-            );     
-          } 
+            ); 
+          }
         }
     )
     ); 
