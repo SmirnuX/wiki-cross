@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:flag/flag.dart';
 
 import 'package:flutter/material.dart';

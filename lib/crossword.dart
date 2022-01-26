@@ -27,54 +27,47 @@ class CrosswordRouteState extends State<CrosswordRoute>
   //Поиск по Википедии: https://en.wikipedia.org/wiki/Special:Search?search=
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Wiki Crossword',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: Colors.tealAccent[100],
-      ),
-      home: StreamBuilder(  //TODO - добавить анимации
-        stream: pool,
-        builder:(BuildContext context, AsyncSnapshot<List<Gen_Word>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
-          {
-            return MyHomePage(title: 'Alpha WikiCross', words: snapshot.data);
-          }
-          else if (snapshot.hasError)
-          {
-            return Text('Error!');  //TODO - нормальное окно ошибки
-          }
-          else if (snapshot.connectionState == ConnectionState.active)
-          {
-            return Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    Text('Загрузка... ${snapshot.data!.length}/${widget.pool_size}'),
-                  ],
-                )
-              ),
-            );     
-          }
-          else
-          {
-            return Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    Text('Загрузка... 0/${widget.pool_size}'),
-                  ],
-                )
-              ),
-            ); 
-          }
+    return StreamBuilder(  //TODO - добавить анимации
+      stream: pool,
+      builder:(BuildContext context, AsyncSnapshot<List<Gen_Word>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
+        {
+          return MyHomePage(title: 'Alpha WikiCross', words: snapshot.data);
         }
-    )
-    ); 
+        else if (snapshot.hasError)
+        {
+          return Text('Error!');  //TODO - нормальное окно ошибки
+        }
+        else if (snapshot.connectionState == ConnectionState.active)
+        {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  Text('Загрузка... ${snapshot.data!.length}/${widget.pool_size}'),
+                ],
+              )
+            ),
+          );     
+        }
+        else
+        {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  Text('Загрузка... 0/${widget.pool_size}'),
+                ],
+              )
+            ),
+          ); 
+        }
+      }
+    );
   }
 }
 
@@ -177,7 +170,7 @@ class MyHomePageState extends State<MyHomePage> {
     }
     if (win)
     {
-      print('=======ПОБЕДА========');
+      Navigator.pushNamed(context, '/final', arguments: [0, Words.length, Words.length]);
     } 
     return win;
   }
