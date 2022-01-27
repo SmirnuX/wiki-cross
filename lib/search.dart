@@ -60,7 +60,7 @@ class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStat
                     ),
                     onPressed: () 
                     {
-                      Navigator.pushNamed(context, '/crossword', arguments: 'https://ru.wikipedia.org/wiki/Special:Random');
+                      Navigator.pushNamed(context, '/cross_settings', arguments: ['https://ru.wikipedia.org/wiki/Special:Random', 'Случайная']);
                     }
                   ),
                 ),
@@ -73,7 +73,7 @@ class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStat
                     ),
                     onPressed: () 
                     {
-                      Navigator.pushNamed(context, '/crossword', arguments: 'https://en.wikipedia.org/wiki/Special:Random');
+                      Navigator.pushNamed(context, '/cross_settings', arguments: ['https://en.wikipedia.org/wiki/Special:Random', 'Случайная']);
                     }
                   ),
                 ),
@@ -134,7 +134,7 @@ class _SearchTabState extends State<SearchTab> {
                     child: Card(
                       child: InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context, '/crossword', arguments: a.value);
+                          Navigator.pushNamed(context, '/cross_settings', arguments: [a.value, a.key]);
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),child: Text(

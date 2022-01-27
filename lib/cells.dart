@@ -126,7 +126,7 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
         child: InkWell(
           focusNode: myFocusNode,
           onFocusChange: (bool f) {
-            var parent = MyHomePage.of(context);
+            var parent = CrosswordPage.of(context);
             if (parent != null)
             {
               if (f) 
@@ -163,7 +163,7 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
                   textAlign: TextAlign.center,
                   maxLength: 2, //Extra character for next symbol
                   onChanged: (String value) {
-                    var parent = MyHomePage.of(context);
+                    var parent = CrosswordPage.of(context);
                     if (parent != null)
                     {
                       parent.ChangeLetter(value, word_ind, let_ind);

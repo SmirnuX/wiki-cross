@@ -24,7 +24,7 @@ class WikiPage  //Страница с Википедии
   bool priority;  //Приоритет слова - если низкий, то слово не будет включаться само по себе, а будут использоваться только для рекурсивного поиска
 }
 
-Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
+Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target, int max_len) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
 {
   List <Gen_Word> result = [];
   http.Client client = http.Client(); //Создание клиента для удобства нескольких запросов
@@ -35,7 +35,7 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
   {
     throw Error('Something went wrong ;( (HTTP code: ${got_response.statusCode}');
   }
-  var original_page = ParseRequest(got_response, true); //Парсинг статьи
+  var original_page = ParseRequest(got_response, true, max_len); //Парсинг статьи
   List <String> pool = [];  //Пул ссылок на статьи, из которых будет выбираться целевое количество слов
   print(original_page.links.length);
   pool.addAll(original_page.links);
@@ -49,7 +49,7 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
     {
       throw Error('Something went wrong ;( (HTTP code: ${(await response).statusCode}');
     }
-    var new_page = ParseRequest(await response, true);
+    var new_page = ParseRequest(await response, true, max_len);
     print(new_page.links.length);
     pool.addAll(new_page.links);
   }
@@ -73,7 +73,7 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
     {
       throw Error('Something went wrong ;( (HTTP code: ${(await response).statusCode}');
     }
-    var new_page = ParseRequest(await response, false); 
+    var new_page = ParseRequest(await response, false, max_len); 
     bool add = true;
     for (var p in result)
     {
@@ -104,7 +104,7 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
   // return result;
 }
 
-WikiPage ParseRequest(http.Response response, bool search_links) //Обработать страницу с Википедии
+WikiPage ParseRequest(http.Response response, bool search_links, int max_len) //Обработать страницу с Википедии
 {
   //Поиск названия
   String? header_w_tag = RegExp('<h1.*?id *= *?"firstHeading".*?class *?= *?"firstHeading mw-first-heading">.*?<\\/h1>').stringMatch(response.body);
@@ -126,7 +126,7 @@ WikiPage ParseRequest(http.Response response, bool search_links) //Обрабо�
     bool found = false;
     for (var word in split_header)
     {
-      if (word.length < 20 && word.length > 1)
+      if (word.length < max_len && word.length > 1)
       {
         header = word;
         found = true;

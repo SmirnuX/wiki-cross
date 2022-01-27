@@ -4,7 +4,6 @@
 import 'cells.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'main.dart';
 
 class Math {
   static bool interserct(int a, int b, int c, int d)  //Пересекаются ли отрезки a-c и b-d
@@ -23,7 +22,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
   int width = 0, height = 0;  //Ширина и высота поля
   int word_count = 0; //Количество слов в кроссворде
 
-  Gen_Crossword(List <Gen_Word> words, int target) {  //Генерация кроссворда по списку слов words с целевой длиной в target cлов
+  Gen_Crossword(List <Gen_Word> words, int target, int buf_inc) {  //Генерация кроссворда по списку слов words с целевой длиной в target cлов
     //Подсчет вхождений каждой буквы
     const String letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯ';
     target = target>words.length?words.length:target;
@@ -73,7 +72,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
     int tries = 0;
     while (!dead_end && field_words.length < target)
     {
-      buffer = buffer < words.length ? buffer + 1 : words.length; 
+      buffer = buffer + buf_inc < words.length ? buffer + buf_inc : words.length; 
       if (words.isEmpty)
       {
         break;
@@ -107,7 +106,6 @@ class Gen_Crossword { //Сгенерированный кроссворд
                 y: fword.hor? fword.y - i : fword.y + lastFound,
                 num: new_ind,
                 definition: words[ind].definition));
-              //!Добавление пересечений
               GetIntersections(field_words.length-1);
               if (fword.hor)
               {

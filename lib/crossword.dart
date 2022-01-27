@@ -9,20 +9,46 @@ import 'definition.dart';
 
 
 class CrosswordRoute extends StatefulWidget {
-  CrosswordRoute({Key? key, required this.url}) : super(key: key);
-  int pool_size = 30;
+  CrosswordRoute({Key? key, required this.url, required this.size, required this.diff}) : super(key: key);
   String url;
+  int size;
+  int diff;
   State<CrosswordRoute> createState() => CrosswordRouteState();
 }
 
 class CrosswordRouteState extends State<CrosswordRoute>
 {
   late Stream<List<Gen_Word>> pool;
-
+  late int pool_size;
+  late int recursive_links;
+  late int max_length;
+  late int buffer_inc;  //Увеличение буфера с каждым шагом
   @override
   void initState()
   {
-    pool = wiki.RequestPool(widget.url, widget.pool_size, 3);
+    switch (widget.diff)
+    {
+      case 1: //Низкий уровень сложности
+        pool_size = 4 * widget.size;
+        recursive_links = 1;
+        max_length = 12;
+        buffer_inc = 1;
+        break;
+      case 2: //Средний
+        pool_size = 3 * widget.size;
+        recursive_links = 3;
+        max_length = 16;
+        buffer_inc = 2;
+        break;
+      case 3: //Высокий
+        pool_size = 2 * widget.size;
+        recursive_links = 5;
+        max_length = 20;
+        buffer_inc = 5;
+        break;
+    }
+
+    pool = wiki.RequestPool(widget.url, pool_size, recursive_links, max_length);
   }
   //Поиск по Википедии: https://en.wikipedia.org/wiki/Special:Search?search=
   @override
@@ -32,7 +58,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
       builder:(BuildContext context, AsyncSnapshot<List<Gen_Word>> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
         {
-          return MyHomePage(title: 'Alpha WikiCross', words: snapshot.data);
+          return CrosswordPage(words: snapshot.data!, size: widget.size, buf_inc: buffer_inc );
         }
         else if (snapshot.hasError)
         {
@@ -46,7 +72,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const CircularProgressIndicator(),
-                  Text('Загрузка... ${snapshot.data!.length}/${widget.pool_size}'),
+                  Text('Загрузка... ${snapshot.data!.length}/$pool_size'),
                 ],
               )
             ),
@@ -60,7 +86,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const CircularProgressIndicator(),
-                  Text('Загрузка... 0/${widget.pool_size}'),
+                  Text('Загрузка... 0/$pool_size'),
                 ],
               )
             ),
@@ -71,22 +97,21 @@ class CrosswordRouteState extends State<CrosswordRoute>
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({UniqueKey? key, required this.title, required this.words}) : super(key: key);
-  final String title;
-  List <Gen_Word>? words;
-  
+class CrosswordPage extends StatefulWidget {
+  CrosswordPage({UniqueKey? key, required this.words, required this.size, required this.buf_inc}) : super(key: key);
+  List <Gen_Word> words;
+  int size, buf_inc;
   @override
-  State<MyHomePage> createState() => MyHomePageState();
+  State<CrosswordPage> createState() => CrosswordPageState();
 
-  static MyHomePageState? of (BuildContext context)
+  static CrosswordPageState? of (BuildContext context)
   {
-    var res = context.findAncestorStateOfType<MyHomePageState>();
+    var res = context.findAncestorStateOfType<CrosswordPageState>();
     return res;
   }
 }
 
-class MyHomePageState extends State<MyHomePage> {
+class CrosswordPageState extends State<CrosswordPage> {
   List <Field_Word> Words = [];
   int chosen = 0;  //Выбранное слово
   int chosen_let = -1;  //Выбранная буква
@@ -94,7 +119,7 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState()
   {
-    crossword = Gen_Crossword(widget.words!, 10);
+    crossword = Gen_Crossword(widget.words, widget.size, widget.buf_inc);
     Words = crossword.GetWordList();
   }
 

@@ -23,14 +23,20 @@ class FinalRoute extends StatelessWidget {
               Text('Подсказок использовано: $hints'),
               Text(right == all ? ' ' : 'Правильных слов: $right/$all') 
             ],),  
-            IconButton(onPressed: () {Navigator.pushNamed(context, '/');}, icon: Stack(
-              alignment: Alignment.center,
+            Stack(
+              alignment: Alignment.center, 
               children: [
                 Icon(Icons.circle, color: Colors.blue[200], size: 100),
-                Icon (Icons.home, color: Colors.white, size: 80)
+                IconButton(
+                  onPressed: () {Navigator.pushNamed(context, '/');}, 
+                  iconSize: 80,
+                  padding: const EdgeInsets.all(0) ,
+                  alignment: Alignment.center,
+                  icon: Icon (Icons.home, color: Colors.white)
+                )   
               ],
-            ),
-            )           
+            )  
+
           ]
         ),
       ),
