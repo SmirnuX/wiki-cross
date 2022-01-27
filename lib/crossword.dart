@@ -182,6 +182,23 @@ class CrosswordPageState extends State<CrosswordPage> {
     checkForWin(); 
   }
 
+  void EraseWord(int word_ind)  //Заменить все буквы на пробелы
+  {
+    setState(() {
+      for (int i = 0; i < Words[word_ind].length; i++)
+      {
+        if (Words[word_ind].word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
+        {
+          continue;
+        }
+        else
+        {
+          Words[word_ind].word = Words[word_ind].word.replaceRange(i, i+1, '_');
+        }
+      }
+    });
+  }
+
   bool checkForWin()  //Проверка на выигрыш
   {
     bool win = true;

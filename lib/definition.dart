@@ -103,19 +103,41 @@ class _DefinitionState extends State<Definition> {
         children: [
           Container(  //Номер слова
             margin: const EdgeInsets.fromLTRB(15, 10, 15, 5),
-            child: Chip( 
-              label:Text(
-                (widget.source==null)?'':'${widget.source!.num+1}/${widget.num}',
-                style: widget.Counter_style,
-              )
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Chip( 
+                  label:Text(
+                    (widget.source==null)?'':'${widget.source!.num+1}/${widget.num}',
+                    style: widget.Counter_style,
+                  )
+                ),
+                Chip( 
+                  label: IconButton(
+                    iconSize: 18,
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      var parent = CrosswordPage.of(context);
+                      if (parent != null && widget.source != null)
+                      {
+                        parent.EraseWord(widget.source!.num);
+                      }
+                    },
+                  ),
+
+                ),
+              ]
             )
           ),
-          Container(  //Само слово
-            margin: const EdgeInsets.fromLTRB(15, 5, 15, 5),
-            height: 50,
+          FittedBox(  //Само слово
+            fit: BoxFit.contain,
             alignment: Alignment.centerLeft,
-            child:FittedBox(
-              fit: BoxFit.contain,
+            child:Container(
+              margin: const EdgeInsets.fromLTRB(15, 5, 15, 5),
+              height: 50,
               alignment: Alignment.centerLeft,
               child: FocusTraversalGroup(
                 child: Row (
