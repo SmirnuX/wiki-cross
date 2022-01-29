@@ -107,17 +107,22 @@ class _DefinitionState extends State<Definition> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Chip( 
-                  label:Text(
+                  label:SizedBox(
+                    height: 25,
+                    child: Text(
                     (widget.source==null)?'':'${widget.source!.num+1}/${widget.num}',
                     style: widget.Counter_style,
-                  )
+                  ))
                 ),
                 Chip( 
-                  label: IconButton(
+                  label: SizedBox(
+                    height: 25,
+                    child: IconButton(
+                    padding: EdgeInsets.zero,
                     iconSize: 18,
                     icon: const Icon(
                       Icons.delete,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     onPressed: () {
                       var parent = CrosswordPage.of(context);
@@ -126,7 +131,7 @@ class _DefinitionState extends State<Definition> {
                         parent.EraseWord(widget.source!.num);
                       }
                     },
-                  ),
+                  ),)
 
                 ),
               ]

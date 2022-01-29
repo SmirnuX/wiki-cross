@@ -4,6 +4,7 @@
 
 import 'package:characters/characters.dart';
 import 'dart:math';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -14,19 +15,18 @@ import 'package:wiki_cross/parser.dart';
 
 class WikiPage  //Страница с Википедии
 {
-  WikiPage({required this.title, required this.content, required this.links, required this.priority});
-  // String url;
+  WikiPage({required this.title, required this.content, required this.links, required this.priority, this.ext_content = '', this.picture = ''});
   String title;
   String content;
-  // String trimmed_content;
-  // String picture;
+  String ext_content;
+  String picture;
   List <String> links;
   bool priority;  //Приоритет слова - если низкий, то слово не будет включаться само по себе, а будут использоваться только для рекурсивного поиска
 }
 
-Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target, int max_len) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
+Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target, int max_len, {List<String> start_pool = const []}) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
 {
-  List <Gen_Word> result = [];
+  List <Gen_Word> result = [];  //Генерируемый список слов, использующийся для создания кроссворда
   http.Client client = http.Client(); //Создание клиента для удобства нескольких запросов
   Uri uri = Uri.parse(url); //Парсинг URL
   var response = http.get(uri);
@@ -36,8 +36,8 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
     throw Error('Something went wrong ;( (HTTP code: ${got_response.statusCode}');
   }
   var original_page = ParseRequest(got_response, true, max_len); //Парсинг статьи
-  List <String> pool = [];  //Пул ссылок на статьи, из которых будет выбираться целевое количество слов
-  print(original_page.links.length);
+  List <String> pool = [];
+  pool += start_pool;  //Пул ссылок на статьи, из которых будет выбираться целевое количество слов
   pool.addAll(original_page.links);
   pool.shuffle();
   //1. Выбираем случайные статьи, ссылки с которых также добавятся в пул
@@ -50,11 +50,9 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
       throw Error('Something went wrong ;( (HTTP code: ${(await response).statusCode}');
     }
     var new_page = ParseRequest(await response, true, max_len);
-    print(new_page.links.length);
     pool.addAll(new_page.links);
   }
   pool.shuffle();
-  print('TOTAL - ${pool.length}');
   //2. Выбираем из пула окончательный пул
   List <String> final_pool = [];  //Окончательный пул
   final_pool.add(url);  //Добавляем оригинальную страницу, чтобы он не вошел в итоговый кроссворд
@@ -101,8 +99,134 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
     throw Error('Something went wrong ;( (Couldn\'t get words from this article).');
   }
   client.close();
-  // return result;
 }
+
+Future <WikiPage> GetArticle(http.Client client, String title, bool recursive, bool russian, int max_len) async  //Получить название и содержание статьи
+{
+  String query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + 
+    '/w/api.php?format=json&action=query&prop=extracts&exchars=500&exintro&explaintext&redirects=1&titles=' + title;
+  var uri = Uri.parse(query);
+  var response = await client.get(uri);
+  if ((response).statusCode != 200)
+  {
+    throw Error('Something went wrong ;( (HTTP code: ${(response).statusCode}');
+  }
+  var json_result = jsonDecode(response.body);
+  var res1 = json_result['query'];
+  var res2 = res1['pages'];
+  var result = res2[(res2 as Map<String, dynamic>).keys.last];
+  
+  bool priority = false;
+  //Проверка слова
+  var new_title = CheckWord(result['title'], max_len);
+  if (new_title != '')
+  {
+    priority = true;
+  }
+
+  List<String> links = [];
+  if (recursive)  //Поиск ссылок
+  {
+    
+  }
+
+  if (!priority)
+  {
+    return WikiPage(content: '', title: result['title'], links: links, priority: priority);
+  }
+
+  var full_description = CleanText(result['extract'], new_title);
+  if (full_description[0] == 0) //Если в описании нету вхождения названия
+  {
+   full_description = CleanText(result['title'] + '. ' + full_description[1], new_title);
+  }
+  var full_desc = full_description[1] as String;
+  String short_desc;
+  if (full_desc.indexOf('.') == full_desc.lastIndexOf('.')) //Если описание состоит из всего одного предложения
+  {
+    short_desc = full_desc;
+    full_desc = '';
+    if (!short_desc.contains('.'))  //Если предложение не умещается в 500 символов (?)
+    {
+      short_desc += '...';
+    }
+  }
+  else
+  {
+    short_desc = full_desc.substring(0, full_desc.indexOf('.'));
+  }
+
+  print(result['title']);
+  print(new_title);
+  print(short_desc);
+  print(full_desc);
+  
+  String pic_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос изображения
+    '/w/api.php?action=query&format=json&prop=pageimages&pilimit=1&piprop=thumbnail&pithumbsize=600&titles=' + title;
+  uri = Uri.parse(pic_query);
+  response = await client.get(uri);
+  json_result = jsonDecode(response.body);
+  res1 = json_result['query']['pages'];
+  res2 = res1[(res1 as Map<String, dynamic>).keys.last];
+  var pic_result = res2 as Map<String, dynamic>;
+  var picture = '';
+  if (pic_result.containsKey('thumbnail'))
+  {
+    picture = pic_result['thumbnail']['source'];
+  }
+
+  return WikiPage(title: new_title, content: short_desc, ext_content: full_desc, 
+                  links: links, priority: priority, picture: picture);
+
+  
+}
+
+String CheckWord(String word, int max_len) //Проверка слова - оно не должно начинаться с цифр и не быть слишком длинным/коротким
+{  
+  if (word.startsWith(RegExp('[0-9]'))) //Если начинается с цифр - убираем слово (скорее всего, это дата)
+  {
+    return '';
+  }
+  if (word.contains(' ')) //Разделение предложения на слова
+  {
+    var split_words = word.split(' ');
+    split_words.shuffle();  //Поиск случайного подходящего слова
+    bool found = false;
+    for (var one_word in split_words)
+    {
+      if (one_word.length < max_len && one_word.length > 2)
+      {
+        return one_word.toUpperCase();
+      }
+    }
+  }
+  return '';
+}
+
+List<String> EditContent (String content, String title, String full_title) //Убрать вхождения title в content, избавиться от скобок, вернуть две версии - укороченную и обычную
+{
+  //Удаление скобок
+  //Удаление title
+  //Удаление двойных пробелов
+  //Если в тексте нет title, добавление full_title в начало
+  return [];
+}
+
+/*WikiApi:
+  Получить первое изображение
+    https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=Saint_Petersburg&pilimit=1&piprop=thumbnail&pithumbsize=600
+  
+  Получить до 500 ссылок со страницы
+    https://en.wikipedia.org/w/api.php?action=query&format=jsonfm&titles=Saint_Petersburg&redirects&generator=links&gpllimit=500&prop=info&inprop=url
+
+  Продолжение
+    https://en.wikipedia.org/w/api.php?action=query&generator=links&redirects&gpllimit=5&format=jsonfm&titles=Estelle_Morris&prop=info&inprop=url&continue=
+
+  Получить краткое содержание и наименование статьи
+    https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=Stack%20Overflow
+
+
+*/
 
 WikiPage ParseRequest(http.Response response, bool search_links, int max_len) //Обработать страницу с Википедии
 {
@@ -171,7 +295,7 @@ WikiPage ParseRequest(http.Response response, bool search_links, int max_len) //
     content_start += 3; //Пропуск тега
     int content_end = content_w_tag.indexOf('</p>', content_start); 
     content = content_w_tag.substring(content_start, content_end);  //Строка, начинающаяся с тега названия
-    content = CleanText(content, header);
+    // content = CleanText(content, header);
     //Оптимальная длина составляет около 200 символов.
     content = TrimContent(content, 300);
     print(content);

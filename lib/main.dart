@@ -18,6 +18,8 @@ import 'final.dart';
 import 'cross_settings.dart';
 
 void main() {
+  wiki.GetArticle('Stack Overflow', false, false, 20);
+
   runApp(MaterialApp(
     title: 'Wiki Crossword',
     theme: ThemeData(

@@ -127,6 +127,13 @@ class CrosswordPageState extends State<CrosswordPage> {
   Widget build(BuildContext context) {
     var def = Definition(source: chosen == -1?Words[0]:Words[chosen], index: chosen_let, num: crossword.word_count);
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.red[400],
+        onPressed: () {
+          Navigator.pushNamed(context, '/final', arguments: [0, checkForWin(), Words.length]);
+        },
+        child: const Icon(Icons.close),),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
       bottomSheet: def,
       body: Builder(
         builder: (BuildContext context) {
@@ -179,7 +186,10 @@ class CrosswordPageState extends State<CrosswordPage> {
       }
       crossword.field_words.setAll(0, Words);
     }); 
-    checkForWin(); 
+    if (checkForWin() == Words.length)
+    {
+      Navigator.pushNamed(context, '/final', arguments: [0, Words.length, Words.length]);
+    }
   }
 
   void EraseWord(int word_ind)  //Заменить все буквы на пробелы
@@ -187,33 +197,28 @@ class CrosswordPageState extends State<CrosswordPage> {
     setState(() {
       for (int i = 0; i < Words[word_ind].length; i++)
       {
-        if (Words[word_ind].word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
+        if (Words[word_ind].in_word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
         {
           continue;
         }
         else
         {
-          Words[word_ind].word = Words[word_ind].word.replaceRange(i, i+1, '_');
+          ChangeLetter('', word_ind, i);
         }
       }
     });
   }
 
-  bool checkForWin()  //Проверка на выигрыш
+  int checkForWin()  //Проверка на выигрыш
   {
-    bool win = true;
+    int right = 0;
     for (var word in Words)
     {
-      if (word.word != word.in_word)
+      if (word.word == word.in_word)
       {
-        win = false;
-        break;
+        right++;
       }
     }
-    if (win)
-    {
-      Navigator.pushNamed(context, '/final', arguments: [0, Words.length, Words.length]);
-    } 
-    return win;
+    return right;
   }
 }

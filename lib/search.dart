@@ -250,7 +250,7 @@ Future <Map<String, String>> SearchWiki(String query, bool is_rus) async
     throw Error();
   }
   List<String> results = (json_result[1] as List<dynamic>).cast<String>();
-  List<String> urls = (json_result[3] as List<dynamic>).cast<String>();;
+  List<String> urls = (json_result[3] as List<dynamic>).cast<String>();
   if (results.isEmpty)
   {
     return <String,String>{};

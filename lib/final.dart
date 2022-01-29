@@ -29,10 +29,10 @@ class FinalRoute extends StatelessWidget {
                 Icon(Icons.circle, color: Colors.blue[200], size: 100),
                 IconButton(
                   onPressed: () {Navigator.pushNamed(context, '/');}, 
-                  iconSize: 80,
+                  iconSize: 60,
                   padding: const EdgeInsets.all(0) ,
                   alignment: Alignment.center,
-                  icon: Icon (Icons.home, color: Colors.white)
+                  icon: const Icon (Icons.home, color: Colors.white)
                 )   
               ],
             )  

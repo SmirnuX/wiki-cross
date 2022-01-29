@@ -3,8 +3,9 @@
 import 'dart:math';
 import 'package:characters/characters.dart';
 
-String CleanText (String source, String title)  //Удаление HTML-тегов, сносок, нечитаемых символов и т.д.
+List<dynamic> CleanText (String source, String title)  //Удаление HTML-тегов, сносок, нечитаемых символов и т.д.
 {
+  int limit = 300;
   /* Необходимо убрать:
   + Все, что находится в круглых, квадратных и треугольных скобках,
   ? Выноски (начинаются на &#91;, заканчиваются на &#93;)
@@ -40,7 +41,7 @@ String CleanText (String source, String title)  //Удаление HTML-тего
   Map<String, String> symbols = {
     '—' : '-',
   };
-  //1. Замена всех символов на экиваленты
+  //1. Замена всех символов на эквиваленты
   int actual_i = 0;
   String result = '';
   var iter = source.characters.iterator;
@@ -116,6 +117,8 @@ String CleanText (String source, String title)  //Удаление HTML-тего
   int word_meet = 0;  //Количество вхождений искомого слова в определение
   double target_delta = 3;  //Количество букв, которое может не совпадать в двух словах
   int word_len = 0;
+  bool is_first_sentence = true;  //Находится ли итератор в первом предложении
+  List <String> end_of_sent = ['.', '!', '?'];
   while(second_iter.moveNext()) //Второй проход - удаление двойных пробелов, удаление из определения искомого слова
   {
     if (second_iter.current == ' ')
@@ -134,6 +137,11 @@ String CleanText (String source, String title)  //Удаление HTML-тего
     }
     else if (title == '')
     {
+      final_result+=second_iter.current;
+    }
+    else if (end_of_sent.contains(second_iter.current))
+    {
+      is_first_sentence = false;
       final_result+=second_iter.current;
     }
     else  //Удаление слова
@@ -168,6 +176,10 @@ String CleanText (String source, String title)  //Удаление HTML-тего
         if (uneq_count < 3 || uneq_count.toDouble()/(word_iter.current.length+1+word_len) < 0.1) //Несовпадающих символов меньше трех, либо их процент меньше 10 процентов
         {
           final_result += tmp;
+          if (is_first_sentence)  //Если слово встречается в первом предложении
+          {
+            word_meet++;
+          }
         }
         else
         {
@@ -184,7 +196,7 @@ String CleanText (String source, String title)  //Удаление HTML-тего
     
   }
   final_result = final_result.trim();
-  return final_result;
+  return <dynamic> [word_meet ,final_result];
 }
 
 CharacterRange PassBrackets(CharacterRange original)  //Пропуск скобок
@@ -240,6 +252,5 @@ CharacterRange PassBrackets(CharacterRange original)  //Пропуск скоб�
       }
     }
   }
-  print('return cause of end');
   return original;
 }
