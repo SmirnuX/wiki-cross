@@ -24,38 +24,28 @@ class WikiPage  //Страница с Википедии
   bool priority;  //Приоритет слова - если низкий, то слово не будет включаться само по себе, а будут использоваться только для рекурсивного поиска
 }
 
-Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target, int max_len, {List<String> start_pool = const []}) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
+Stream<List <Gen_Word>> RequestPool(String title, int target, int recursive_target, bool russian, int max_len, {List<String> start_pool = const []}) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
 {
   List <Gen_Word> result = [];  //Генерируемый список слов, использующийся для создания кроссворда
   http.Client client = http.Client(); //Создание клиента для удобства нескольких запросов
-  Uri uri = Uri.parse(url); //Парсинг URL
-  var response = http.get(uri);
-  http.Response got_response = await response;  //Ожидание ответа
-  if (got_response.statusCode != 200) //Проверка кода HTTP
-  {
-    throw Error('Something went wrong ;( (HTTP code: ${got_response.statusCode}');
-  }
-  var original_page = ParseRequest(got_response, true, max_len); //Парсинг статьи
   List <String> pool = [];
-  pool += start_pool;  //Пул ссылок на статьи, из которых будет выбираться целевое количество слов
-  pool.addAll(original_page.links);
+  if (title != '')
+  {
+    var original_page = await GetArticle(client, title, true, russian, max_len);
+    pool.addAll(original_page.links);
+  }
+  pool += start_pool;  //Пул ссылок на статьи, из которых будет выбираться целевое количество слов (для тематических кроссвордов) 
   pool.shuffle();
   //1. Выбираем случайные статьи, ссылки с которых также добавятся в пул
   for (int i = 0; i < recursive_target && i < pool.length; i++)
   {
-    var uri = Uri.parse(pool[i]);
-    var response = http.get(uri);
-    if ((await response).statusCode != 200)
-    {
-      throw Error('Something went wrong ;( (HTTP code: ${(await response).statusCode}');
-    }
-    var new_page = ParseRequest(await response, true, max_len);
+    var new_page = await GetArticle(client, pool[i], true, russian, max_len);
     pool.addAll(new_page.links);
   }
   pool.shuffle();
   //2. Выбираем из пула окончательный пул
   List <String> final_pool = [];  //Окончательный пул
-  final_pool.add(url);  //Добавляем оригинальную страницу, чтобы он не вошел в итоговый кроссворд
+  final_pool.add(title);  //Добавляем оригинальную страницу, чтобы он не вошел в итоговый кроссворд
   for (int i = 0; i < target && i < pool.length; i++)
   {
     //Проверка на повторы
@@ -65,13 +55,7 @@ Stream<List <Gen_Word>> RequestPool(String url, int target, int recursive_target
       i--;
       continue;
     }
-    var uri = Uri.parse(pool[i]);
-    var response = http.get(uri);
-    if ((await response).statusCode != 200)
-    {
-      throw Error('Something went wrong ;( (HTTP code: ${(await response).statusCode}');
-    }
-    var new_page = ParseRequest(await response, false, max_len); 
+    var new_page = await GetArticle(client, pool[i], false, russian, max_len);
     bool add = true;
     for (var p in result)
     {

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class GenRoute extends StatefulWidget {
-  GenRoute({ Key? key, required this.url, required this.title }) : super(key: key);
+  GenRoute({ Key? key, required this.url, required this.title, required this.lang_rus }) : super(key: key);
   String url, title;
+  bool lang_rus;
   @override
   _GenRouteState createState() => _GenRouteState();
 }
@@ -64,7 +65,7 @@ class _GenRouteState extends State<GenRoute> {
               children: [
                 const Icon(Icons.circle, color: Colors.blue, size: 100),
                 IconButton(
-                  onPressed: () {Navigator.pushNamed(context, '/crossword', arguments: GenSettings(widget.url, size, difficulty));}, 
+                  onPressed: () {Navigator.pushNamed(context, '/crossword', arguments: GenSettings(widget.title, size, difficulty, widget.lang_rus));}, 
                   iconSize: 80,
                   padding: const EdgeInsets.all(0) ,
                   alignment: Alignment.center,
@@ -81,8 +82,9 @@ class _GenRouteState extends State<GenRoute> {
 
 class GenSettings
 {
-  GenSettings(this.url, this.size, this.difficulty);
-  String url;
+  GenSettings(this.title, this.size, this.difficulty, this.lang_rus);
+  String title;
+  bool lang_rus;
   int size;
   int difficulty;
 }

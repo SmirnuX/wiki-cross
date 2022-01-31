@@ -9,8 +9,9 @@ import 'definition.dart';
 
 
 class CrosswordRoute extends StatefulWidget {
-  CrosswordRoute({Key? key, required this.url, required this.size, required this.diff}) : super(key: key);
-  String url;
+  CrosswordRoute({Key? key, required this.title, required this.size, required this.diff, required this.lang_rus}) : super(key: key);
+  String title;
+  bool lang_rus;
   int size;
   int diff;
   State<CrosswordRoute> createState() => CrosswordRouteState();
@@ -48,7 +49,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
         break;
     }
 
-    pool = wiki.RequestPool(widget.url, pool_size, recursive_links, max_length);
+    pool = wiki.RequestPool(widget.title, pool_size, recursive_links, widget.lang_rus, max_length);
   }
   //Поиск по Википедии: https://en.wikipedia.org/wiki/Special:Search?search=
   @override
