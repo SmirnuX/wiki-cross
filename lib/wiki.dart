@@ -127,7 +127,41 @@ Future <WikiPage> GetArticle(http.Client client, String title, bool recursive, b
   List<String> links = [];
   if (recursive)  //Поиск ссылок
   {
-    
+    String link_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос ссылок
+    '/w/api.php?action=query&format=json&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&inprop=url&titles=' + title;
+    var links_map = {};
+    do
+    {
+      uri = Uri.parse(link_query);
+      response = await client.get(uri);
+      var json_links = jsonDecode(response.body);
+      links_map = json_links as Map<String, dynamic>;
+      //Получение списка страниц
+      var query_map = links_map['query'] as Map <String, dynamic>;
+      var pages_map = query_map['pages'] as Map <String, dynamic>;
+      for (var page in pages_map.values)  //Добавление страниц в список
+      {
+        var page_res = page as Map<String, dynamic>;
+        var link_res = page_res['title'];
+        if (link_res != null && link_res.runtimeType == String)
+        {
+          links.add(link_res);
+        }  
+      }
+      //Продолжение
+      if (links_map.containsKey('continue'))  //Если есть продолжение
+      {
+        var continue_map = links_map['continue'] as Map <String, dynamic>;
+        link_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос ссылок
+        '/w/api.php?action=query&format=json&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&inprop=url&titles=' + title +
+        '&continue=' + continue_map['continue']! + '&gplcontinue=' + continue_map['gplcontinue']!;
+      }
+    }
+    while (links_map.containsKey('continue'));
+    for (var b in links)
+    {
+      print(b);
+    }
   }
 
   if (!priority)

@@ -16,9 +16,12 @@ import 'wiki.dart' as wiki;
 import 'search.dart';
 import 'final.dart';
 import 'cross_settings.dart';
+import 'package:http/http.dart' as http;
 
-void main() {
-  wiki.GetArticle('Stack Overflow', false, false, 20);
+void main() async{
+  var cl = http.Client();
+  await wiki.GetArticle(cl, 'Stack Overflow', true, false, 20);
+  cl.close();
 
   runApp(MaterialApp(
     title: 'Wiki Crossword',
