@@ -3,14 +3,15 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:wiki_cross/error.dart';
 import 'wiki.dart' as wiki;
 import 'crossgen.dart';
 import 'definition.dart';
 
 
 class CrosswordRoute extends StatefulWidget {
-  CrosswordRoute({Key? key, required this.title, required this.size, required this.diff, required this.lang_rus}) : super(key: key);
-  String title;
+  CrosswordRoute({Key? key, required this.pageid, required this.size, required this.diff, required this.lang_rus}) : super(key: key);
+  int pageid;
   bool lang_rus;
   int size;
   int diff;
@@ -49,9 +50,8 @@ class CrosswordRouteState extends State<CrosswordRoute>
         break;
     }
 
-    pool = wiki.RequestPool(widget.title, pool_size, recursive_links, widget.lang_rus, max_length);
+    pool = wiki.RequestPool(widget.pageid, pool_size, recursive_links, widget.lang_rus, max_length);
   }
-  //Поиск по Википедии: https://en.wikipedia.org/wiki/Special:Search?search=
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(  //TODO - добавить анимации
@@ -63,7 +63,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
         }
         else if (snapshot.hasError)
         {
-          return Text('Error!');  //TODO - нормальное окно ошибки
+          return ErrorRoute(error: snapshot.error.toString());
         }
         else if (snapshot.connectionState == ConnectionState.active)
         {
@@ -87,7 +87,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const CircularProgressIndicator(),
-                  Text('Загрузка... 0/$pool_size'),
+                  Text('Получение ссылок...'),
                 ],
               )
             ),

@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flag/flag.dart';
@@ -20,7 +22,7 @@ class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    tab_controller = TabController(length: 3, vsync: this);
+    tab_controller = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -35,9 +37,6 @@ class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStat
               icon: Icon(Icons.search),
             ),
             Tab(
-              icon: Icon(Icons.casino_rounded),
-            ),
-            Tab(
               icon: Icon(Icons.photo_size_select_actual_rounded),
             ),
           ],
@@ -47,39 +46,6 @@ class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStat
         controller: tab_controller,
         children:[
           SearchTab(),
-          Center( //Случайная статья  
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: ElevatedButton(
-                    child: Padding(
-                      padding: EdgeInsets.all(6), 
-                      child: Text('🎲 Cлучайная статья 🇷🇺', style: widget._bigger,),
-                    ),
-                    onPressed: () 
-                    {
-                      Navigator.pushNamed(context, '/cross_settings', arguments: ['https://ru.wikipedia.org/wiki/Special:Random', 'Случайная', true]);
-                    }
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: ElevatedButton(
-                    child: Padding(
-                      padding: EdgeInsets.all(6), 
-                      child: Text('🎲 Cлучайная статья 🇺🇸', style: widget._bigger,),
-                    ),
-                    onPressed: () 
-                    {
-                      Navigator.pushNamed(context, '/cross_settings', arguments: ['https://en.wikipedia.org/wiki/Special:Random', 'Случайная', false]);
-                    }
-                  ),
-                ),
-              ],
-            ),
-          ),
           Text('Темы')  //Темы
         ]
       ) 
@@ -95,7 +61,7 @@ class SearchTab extends StatefulWidget {  //Вкладка поиска
 }
 
 class _SearchTabState extends State<SearchTab> {
-  late Future<Map<String, String>>? search; //Результаты поиска
+  late Future<Map<String, int>>? search; //Результаты поиска
   TextStyle header_style = const TextStyle(fontSize: 25);
   bool language_rus = true;
   String query = '';
@@ -110,8 +76,8 @@ class _SearchTabState extends State<SearchTab> {
     return Center(
       child: FutureBuilder(
         future: search,
-        initialData: <String, String> {},
-        builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
+        initialData: <String, int> {},
+        builder: (BuildContext context, AsyncSnapshot<Map<String, int>> snapshot) {
           Widget result;
           if (snapshot.connectionState == ConnectionState.done)
           {
@@ -170,9 +136,12 @@ class _SearchTabState extends State<SearchTab> {
                   child:Row(
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
+                        padding: EdgeInsets.fromLTRB(16, 8, 2, 8),
                         child: IconButton(
+                          splashRadius: 28,
                           icon: Container(
+                            alignment: Alignment.center,
+                            transform: Matrix4.diagonal3Values(0.85, 0.85, 0.85),
                             child: Flag.fromCode(language_rus?FlagsCode.RU:FlagsCode.GB, borderRadius: 15.0, flagSize: FlagSize.size_1x1,),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15.0),
@@ -185,6 +154,18 @@ class _SearchTabState extends State<SearchTab> {
                           onPressed: () {
                             setState(() {
                               language_rus = !language_rus;
+                            });
+                          },
+                        )
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(2, 8, 8, 8),
+                        child: IconButton(
+                          splashRadius: 28,
+                          icon: Icon(Icons.casino_outlined),  
+                          onPressed: () {
+                            setState(() {
+                              search = SearchRandom(language_rus);
                             });
                           },
                         )
@@ -212,10 +193,14 @@ class _SearchTabState extends State<SearchTab> {
                         padding: EdgeInsets.fromLTRB(8, 8, 16, 8),
                         child: snapshot.connectionState == ConnectionState.done || snapshot.connectionState == ConnectionState.none ? 
                         IconButton(
+                          splashRadius: 28,
                           icon: Icon(Icons.search),
                           onPressed: () {
                             setState(() {
-                              search = SearchWiki(query, language_rus);
+                              if (query != '')
+                              {
+                                search = SearchWiki(query, language_rus);
+                              }
                             });
                           },
                         ) :
@@ -234,32 +219,58 @@ class _SearchTabState extends State<SearchTab> {
   }
 }
 
-Future <Map<String, String>> SearchWiki(String query, bool is_rus) async
+Future <Map<String, int>> SearchWiki(String query, bool is_rus) async
 {
-  Uri url = Uri.parse(is_rus?
-                      'https://ru.wikipedia.org/w/api.php?action=opensearch&search=${query}&limit=10&namespace=0&format=json':
-                      'https://en.wikipedia.org/w/api.php?action=opensearch&search=${query}&limit=10&namespace=0&format=json');
+  Uri url = Uri.parse(is_rus
+                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json'
+                      :'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json');
   http.Response response = await http.get(url);
   if (response.statusCode != 200)
   {
     throw(Error());
   }
   var json_result = jsonDecode(response.body);
-  if (json_result[1] == null || json_result[3] == null)
+  if (json_result['query'] == null)
   {
     throw Error();
   }
-  List<String> results = (json_result[1] as List<dynamic>).cast<String>();
-  List<String> urls = (json_result[3] as List<dynamic>).cast<String>();
+  List<dynamic> results = json_result['query']['search'] as List<dynamic>;
   if (results.isEmpty)
   {
-    return <String,String>{};
+    return <String,int>{};
   }
-  Map<String,String> final_res = Map.fromIterables(results, urls);
-  for (int i = 0; i < final_res.length; i++)
+  Map<String,int> final_res = {};
+  for (int i = 0; i < results.length; i++)
   {
-    print('${final_res.keys.elementAt(i)}:${final_res.values.elementAt(i)}');
+    final_res.putIfAbsent(results[i]['title'], () => results[i]['pageid']);
   }
   return final_res;
-  //https://ru.wikipedia.org/w/api.php?action=opensearch&search=lego&limit=1&namespace=0&format=json
+}
+
+Future <Map<String, int>> SearchRandom(bool is_rus) async
+{
+  Uri url = Uri.parse(is_rus
+                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=random&rnlimit=10&rnnamespace=0&format=json'
+                      :'https://en.wikipedia.org/w/api.php?action=query&list=random&rnlimit=10&rnnamespace=0&format=json');
+  http.Response response = await http.get(url);
+  if (response.statusCode != 200)
+  {
+    throw(Error());
+  }
+  var json_result = jsonDecode(response.body);
+  if (json_result['query'] == null)
+  {
+    throw Error();
+  }
+  List<dynamic> results = json_result['query']['random'] as List<dynamic>;
+  if (results.isEmpty)
+  {
+    return <String,int>{};
+  }
+  Map<String,int> final_res = {};
+  for (int i = 0; i < results.length; i++)
+  {
+    final_res.putIfAbsent(results[i]['title'], () => results[i]['id']);
+  }
+  return final_res;
 }

@@ -20,18 +20,18 @@ class WikiPage  //Страница с Википедии
   String content;
   String ext_content;
   String picture;
-  List <String> links;
+  List <int> links;
   bool priority;  //Приоритет слова - если низкий, то слово не будет включаться само по себе, а будут использоваться только для рекурсивного поиска
 }
 
-Stream<List <Gen_Word>> RequestPool(String title, int target, int recursive_target, bool russian, int max_len, {List<String> start_pool = const []}) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
+Stream<List <Gen_Word>> RequestPool(int pageid, int target, int recursive_target, bool russian, int max_len, {List<int> start_pool = const []}) async*  //Запрос страницы с википедии, где target - размер пула, recursive_target - количество статей, с которых берутся ссылки
 {
   List <Gen_Word> result = [];  //Генерируемый список слов, использующийся для создания кроссворда
   http.Client client = http.Client(); //Создание клиента для удобства нескольких запросов
-  List <String> pool = [];
-  if (title != '')
+  List <int> pool = [];
+  if (pageid != -1)
   {
-    var original_page = await GetArticle(client, title, true, russian, max_len);
+    var original_page = await GetArticle(client, pageid, true, russian, max_len);
     pool.addAll(original_page.links);
   }
   pool += start_pool;  //Пул ссылок на статьи, из которых будет выбираться целевое количество слов (для тематических кроссвордов) 
@@ -44,8 +44,8 @@ Stream<List <Gen_Word>> RequestPool(String title, int target, int recursive_targ
   }
   pool.shuffle();
   //2. Выбираем из пула окончательный пул
-  List <String> final_pool = [];  //Окончательный пул
-  final_pool.add(title);  //Добавляем оригинальную страницу, чтобы он не вошел в итоговый кроссворд
+  List <int> final_pool = [];  //Окончательный пул
+  final_pool.add(pageid);  //Добавляем оригинальную страницу, чтобы он не вошел в итоговый кроссворд
   for (int i = 0; i < target && i < pool.length; i++)
   {
     //Проверка на повторы
@@ -85,10 +85,10 @@ Stream<List <Gen_Word>> RequestPool(String title, int target, int recursive_targ
   client.close();
 }
 
-Future <WikiPage> GetArticle(http.Client client, String title, bool recursive, bool russian, int max_len) async  //Получить название и содержание статьи
+Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, bool russian, int max_len) async  //Получить название и содержание статьи
 {
   String query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + 
-    '/w/api.php?format=json&action=query&prop=extracts&exchars=500&exintro&explaintext&redirects=1&titles=' + title;
+    '/w/api.php?format=json&action=query&prop=extracts&exchars=500&exintro&explaintext&redirects=1&pageids=' + pageid.toString();
   var uri = Uri.parse(query);
   var response = await client.get(uri);
   if ((response).statusCode != 200)
@@ -108,11 +108,11 @@ Future <WikiPage> GetArticle(http.Client client, String title, bool recursive, b
     priority = true;
   }
 
-  List<String> links = [];
+  List<int> links = [];
   if (recursive)  //Поиск ссылок
   {
     String link_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос ссылок
-    '/w/api.php?action=query&format=json&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&inprop=url&titles=' + title;
+    '/w/api.php?action=query&format=json&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&indexpageids=true&inprop=url&pageids=' + pageid.toString();
     var links_map = {};
     do
     {
@@ -122,30 +122,30 @@ Future <WikiPage> GetArticle(http.Client client, String title, bool recursive, b
       links_map = json_links as Map<String, dynamic>;
       //Получение списка страниц
       var query_map = links_map['query'] as Map <String, dynamic>;
-      var pages_map = query_map['pages'] as Map <String, dynamic>;
-      for (var page in pages_map.values)  //Добавление страниц в список
+      var pages_list = query_map['pageids'] as List <dynamic>;
+      for (var page in pages_list)  //Добавление страниц в список
       {
-        var page_res = page as Map<String, dynamic>;
-        var link_res = page_res['title'];
-        if (link_res != null && link_res.runtimeType == String)
+        int? pageid = int.tryParse(page);
+        if (pageid == null)
         {
-          links.add(link_res);
-        }  
+          continue;
+        }
+        if (pageid <= 0)
+        {
+          continue;
+        }
+        links.add(pageid);
       }
       //Продолжение
       if (links_map.containsKey('continue'))  //Если есть продолжение
       {
         var continue_map = links_map['continue'] as Map <String, dynamic>;
         link_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос ссылок
-        '/w/api.php?action=query&format=json&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&inprop=url&titles=' + title +
+        '/w/api.php?action=query&format=json&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&indexpageids=tru&inprop=url&pageids=' + pageid.toString() +
         '&continue=' + continue_map['continue']! + '&gplcontinue=' + continue_map['gplcontinue']!;
       }
     }
     while (links_map.containsKey('continue'));
-    for (var b in links)
-    {
-      print(b);
-    }
   }
 
   if (!priority)
@@ -180,7 +180,7 @@ Future <WikiPage> GetArticle(http.Client client, String title, bool recursive, b
   print(full_desc);
   
   String pic_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос изображения
-    '/w/api.php?action=query&format=json&prop=pageimages&pilimit=1&piprop=thumbnail&pithumbsize=600&titles=' + title;
+    '/w/api.php?action=query&format=json&prop=pageimages&pilimit=1&piprop=thumbnail&pithumbsize=600&pageids=' + pageid.toString();
   uri = Uri.parse(pic_query);
   response = await client.get(uri);
   json_result = jsonDecode(response.body);
@@ -228,108 +228,6 @@ List<String> EditContent (String content, String title, String full_title) //У�
   //Удаление двойных пробелов
   //Если в тексте нет title, добавление full_title в начало
   return [];
-}
-
-/*WikiApi:
-  Получить первое изображение
-    https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=Saint_Petersburg&pilimit=1&piprop=thumbnail&pithumbsize=600
-  
-  Получить до 500 ссылок со страницы
-    https://en.wikipedia.org/w/api.php?action=query&format=jsonfm&titles=Saint_Petersburg&redirects&generator=links&gpllimit=500&prop=info&inprop=url
-
-  Продолжение
-    https://en.wikipedia.org/w/api.php?action=query&generator=links&redirects&gpllimit=5&format=jsonfm&titles=Estelle_Morris&prop=info&inprop=url&continue=
-
-  Получить краткое содержание и наименование статьи
-    https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=Stack%20Overflow
-
-
-*/
-
-WikiPage ParseRequest(http.Response response, bool search_links, int max_len) //Обработать страницу с Википедии
-{
-  //Поиск названия
-  String? header_w_tag = RegExp('<h1.*?id *= *?"firstHeading".*?class *?= *?"firstHeading mw-first-heading">.*?<\\/h1>').stringMatch(response.body);
-  int header_index = header_w_tag!.indexOf('>');  //Поиск конца тега
-  int header_end_index = header_w_tag.indexOf('</h1>', header_index+1);  //Поиск конца названия
-  String header = header_w_tag.substring(header_index+1, header_end_index);  //Строка, начинающаяся с тега названия
-  header = RemoveTags(header, '');  //Убираем HTML-теги из заголовка
-
-  //Проверка слова - оно не должно начинаться с цифр и не быть слишком длинным/коротким
-  bool priority = true;
-  if (header.startsWith(RegExp('[0-9]'))) //Если начинается с цифр - убираем слово (скорее всего, это дата)
-  {
-    priority = false;
-  }
-  if (header.contains(' ')) //Разделение предложения на слова
-  {
-    var split_header = header.split(' ');
-    split_header.shuffle();
-    bool found = false;
-    for (var word in split_header)
-    {
-      if (word.length < max_len && word.length > 1)
-      {
-        header = word;
-        found = true;
-        break;
-      }
-    }
-    if (!found)
-    {
-      priority = false;
-    }
-  }
-  int st_index = header.indexOf(RegExp(r"[a-zA-Zа-яА-ЯёЁ]"));
-  int end_index = header.lastIndexOf(RegExp(r"[a-zA-Zа-яА-ЯёЁ]"));
-  if (st_index == -1 || end_index == st_index)
-  {
-    priority = false;
-  }
-  else
-  {
-    header = header.substring(st_index, end_index+1);
-    if (header.length >= 20 || header.length <= 2)
-    {
-      priority = false;
-    }
-  }
-
-  if (priority)
-  {
-    header = header.toUpperCase();
-    print(header);
-  }
-  int str_limit = 500;
-  String? content;
-  if (priority)
-  {
-    //Поиск определения
-    int tag_start = response.body.indexOf(RegExp('<div *id *= *"mw-content-text".*<p>.*<\\/p>', dotAll: true)); //Индекс начала тега
-    String temp_source = response.body.substring(tag_start, max(response.body.length, tag_start+str_limit));  //Содержимое страницы
-    String content_w_tag = temp_source.replaceAll(RegExp('<table.*?<\\/table>', dotAll: true), '');  //Удаление таблиц
-    content_w_tag = content_w_tag.replaceAll(RegExp('<td.*?<\\/td>', dotAll: true), '');  //Доудаление таблиц
-    int content_start = content_w_tag.indexOf('<p>');  //Поиск начального тега
-    content_start += 3; //Пропуск тега
-    int content_end = content_w_tag.indexOf('</p>', content_start); 
-    content = content_w_tag.substring(content_start, content_end);  //Строка, начинающаяся с тега названия
-    // content = CleanText(content, header);
-    //Оптимальная длина составляет около 200 символов.
-    content = TrimContent(content, 300);
-    print(content);
-  }
-
-  //Поиск ссылок на другие страницы Википедии
-  List <String> links;
-  if (search_links)
-  {
-    links = GetWikiLinks(response.body, response.request!.url.toString());
-  }
-  else
-  {
-    links = [];
-  }
-  return WikiPage(title: header, content: priority?content!:'', links: links, priority: priority);
 }
 
 List <String> GetWikiLinks(String source, String link_body) //Получить все ссылки со страницы
