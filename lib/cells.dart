@@ -167,7 +167,6 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
                     if (parent != null)
                     {
                       parent.ChangeLetter(value, word_ind, let_ind);
-
                       if (clone_ind != -1)
                       {
                         parent.ChangeLetter(value, clone_ind, clone_let_ind); //Изменение буквы в пересечении

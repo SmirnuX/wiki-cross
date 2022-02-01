@@ -125,10 +125,14 @@ class _DefinitionState extends State<Definition> {
                       color: Colors.black,
                     ),
                     onPressed: () {
-                      var parent = CrosswordPage.of(context);
-                      if (parent != null && widget.source != null)
+                      // var parent = CrosswordPage.of(context);
+                      // if (parent != null && widget.source != null)
+                      // {
+                      //   parent.EraseWord(widget.source!.num);
+                      // }
+                      for (var a in res)
                       {
-                        parent.EraseWord(widget.source!.num);
+                        a.erase(context);
                       }
                     },
                   ),)
@@ -200,6 +204,20 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
   final for_color = Colors.white; //Цвет фона ячейки
   final sel_color = Colors.green[100]; //Цвет выбранной ячейки
   late CellFormatter txt_format = CellFormatter(node:myFocusNode, is_last:last);
+
+  void erase(BuildContext context)
+  {
+    var parent = CrosswordPage.of(context);
+    if (parent != null)
+    {
+      parent.ChangeLetter('', word_ind, let_ind);
+
+      if (clone_ind != -1)
+      {
+        parent.ChangeLetter('', clone_ind, clone_let_ind); //Изменение буквы в пересечении
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

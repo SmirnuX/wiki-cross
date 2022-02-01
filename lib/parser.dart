@@ -3,7 +3,7 @@
 import 'dart:math';
 import 'package:characters/characters.dart';
 
-List<dynamic> CleanText (String source, String title)  //Удаление HTML-тегов, сносок, нечитаемых символов и т.д.
+List<dynamic> CleanText (String source, String title, [bool pass_brackets = true])  //Удаление HTML-тегов, сносок, нечитаемых символов и т.д.
 {
   int limit = 300;
   /* Необходимо убрать:
@@ -77,7 +77,7 @@ List<dynamic> CleanText (String source, String title)  //Удаление HTML-�
         }
         if (iter.current == '#')  //Если это точно специальный символ
         {
-          if (iter.isFollowedBy(Characters('91;')))  //Если это квадратная скобка с неправильным кодированием
+          if (iter.isFollowedBy(Characters('91;')) && pass_brackets)  //Если это квадратная скобка с неправильным кодированием
           {
             iter = PassBrackets(iter);
           }
@@ -93,7 +93,7 @@ List<dynamic> CleanText (String source, String title)  //Удаление HTML-�
         }
       }
     }
-    else if (braces.keys.contains(iter.current))  //Если это начало скобки
+    else if (braces.keys.contains(iter.current) && pass_brackets)  //Если это начало скобки
     {
       iter = PassBrackets(iter);
     }
@@ -149,7 +149,7 @@ List<dynamic> CleanText (String source, String title)  //Удаление HTML-�
       if (second_iter.current == title.substring(0,1) || second_iter.current == title.substring(0,1).toLowerCase())
       {
         int title_index = 1;
-        int uneq_count = 0; //Количество несовпадающих символов
+        int uneq_count = word_len; //Количество несовпадающих символов
         String tmp = "_";
         var word_iter = second_iter.copy();
         word_iter.moveUntil(Characters(' ')); //Получаем все слово
@@ -170,6 +170,7 @@ List<dynamic> CleanText (String source, String title)  //Удаление HTML-�
           else
           {
             uneq_count++;
+            tmp += word_iter.current.substring(i, i+1);
           }
         }
         uneq_count+= title.length - title_index;

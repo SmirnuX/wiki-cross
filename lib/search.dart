@@ -140,14 +140,14 @@ class _SearchTabState extends State<SearchTab> {
                         child: IconButton(
                           splashRadius: 28,
                           icon: Container(
-                            alignment: Alignment.center,
-                            transform: Matrix4.diagonal3Values(0.85, 0.85, 0.85),
-                            child: Flag.fromCode(language_rus?FlagsCode.RU:FlagsCode.GB, borderRadius: 15.0, flagSize: FlagSize.size_1x1,),
+                            // alignment: Alignment.center,
+                            transform: Matrix4.diagonal3Values(0.7, 0.7, 0.7) + Matrix4.translationValues(1.6, 1.6, 1.6),
+                            child: Flag.fromCode(language_rus?FlagsCode.RU:FlagsCode.GB, borderRadius: 0.0, flagSize: FlagSize.size_1x1,),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15.0),
+                              borderRadius: BorderRadius.circular(5.0),
                               border: Border.all(
                                 color: Colors.black,
-                                width: 1,
+                                width: 2,
                               ),
                             ),
                           ),     

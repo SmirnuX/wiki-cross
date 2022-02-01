@@ -93,7 +93,7 @@ Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, boo
   var response = await client.get(uri);
   if ((response).statusCode != 200)
   {
-    throw Error('Something went wrong ;( (HTTP code: ${(response).statusCode}');
+    throw Error('Ошибка соединения. Код ошибки: ${(response).statusCode}');
   }
   var json_result = jsonDecode(response.body);
   var res1 = json_result['query'];
@@ -153,10 +153,10 @@ Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, boo
     return WikiPage(content: '', title: result['title'], links: links, priority: priority);
   }
 
-  var full_description = CleanText(result['extract'], new_title);
+  var full_description = CleanText(result['extract'], new_title, true);
   if (full_description[0] == 0) //Если в описании нету вхождения названия
   {
-   full_description = CleanText(result['title'] + '. ' + full_description[1], new_title);
+   full_description = CleanText(result['title'] + ' - ' + full_description[1], new_title, false);
   }
   var full_desc = full_description[1] as String;
   String short_desc;
@@ -205,147 +205,72 @@ String CheckWord(String word, int max_len) //Проверка слова - он�
   {
     return '';
   }
+  List <String> split_words = [];
   if (word.contains(' ')) //Разделение предложения на слова
   {
-    var split_words = word.split(' ');
+    split_words = word.split(' ');
     split_words.shuffle();  //Поиск случайного подходящего слова
-    bool found = false;
-    for (var one_word in split_words)
+  }
+  else
+  {
+    split_words.add(word);
+  }
+  for (var one_word in split_words)
+  {
+    if (one_word.length < max_len && one_word.length > 2)
     {
-      if (one_word.length < max_len && one_word.length > 2)
+      //Удаление скобок
+      if (one_word.startsWith('('))
       {
-        return one_word.toUpperCase();
+        one_word = one_word.substring(1);
       }
+      if (one_word.endsWith(')') || one_word.endsWith(','))
+      {
+        one_word = one_word.substring(0, one_word.length-1);
+      }
+      return one_word.toUpperCase();
     }
   }
   return '';
 }
 
-List<String> EditContent (String content, String title, String full_title) //Убрать вхождения title в content, избавиться от скобок, вернуть две версии - укороченную и обычную
-{
-  //Удаление скобок
-  //Удаление title
-  //Удаление двойных пробелов
-  //Если в тексте нет title, добавление full_title в начало
-  return [];
-}
-
-List <String> GetWikiLinks(String source, String link_body) //Получить все ссылки со страницы
-{
-  //TODO - ресурсозатратно, увеличивает время загрузки страницы
-  List <String> result = [];
-  List <String> excluded_pages = [  //Исключаемые страницы
-    '/wiki/Main_Page',
-    '/wiki/%D0%97%D0%B0%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F_%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0' //Заглавная страница на русском
-  ];
-  bool russian = link_body.startsWith('https://ru.wikipedia.org');  //Какая википедия выбрана
-  int index = 0;
-  while (source.contains(RegExp('<a href="\\/wiki\\/.*?"'), index))  //Поиск локальных ссылок
-  {
-    index = source.indexOf(RegExp('<a href="\\/wiki\\/.*?"'), index); 
-    String? link = RegExp('<a href="\\/wiki\\/.*?"').stringMatch(source.substring(index));
-    //Проверка на ненужные страницы
-    if (link == null)
-    {
-      break;
-    }
-    index++;
-    if (link.contains(':')) //Исключение страниц типа /wiki/File: и прочих
-    {
-      continue;
-    }
-    bool to_add = true;
-    for (var a in excluded_pages) //Проверка, есть ли она в списке исключенных страниц
-    {
-      if (link.contains(a))
-      {
-        to_add = false;
-        break;
-      }
-    }
-    if (!to_add)
-    {
-      continue;
-    }
-    link = link.replaceFirst('<a href="', russian?'https://ru.wikipedia.org':'https://en.wikipedia.org'); //Замена тега на url сайта
-    link = link.replaceAll('"', ''); //Удаление последих кавычек
-    result.add(link);
-  }
-  return result;
-}
-
-
-String RemoveTags (String source, String title) //Удаление HTML-тегов, сносок и прочего
-{
-  List <RegExp> excluded = [
-    RegExp('<.*?>'),  //HTML-теги
-    RegExp('\\[.*?\\]'), //Квадратные скобки
-    RegExp('\\(.*?\\)'), //Все в скобках (в основном этим убираются переводы)
-    RegExp('&#91;.*?&#93;'), //Выноски (наподобие [1] и т.д.),
-    RegExp('&#.*?;'),  //Все остальные не отображающиеся символы
-    RegExp('\u0301'),  //Ударение
-  ];
-  String result = source;
-  for (var regex in excluded)
-  {
-    result = result.replaceAll(regex, '');  //Удаление всех символов
-  }
-  result = result.replaceAll("&amp;", '&');
-  if (title != '')  //Удаление искомого слова из определения
-  {
-    int start_index = 0;
-    String firstLetter = title.substring(0, 1); //Первая буква слова
-    while ((result.contains(firstLetter, start_index) || result.contains(firstLetter.toLowerCase(), start_index)) )
-    {
-      if (result.contains(title.toLowerCase().substring(1), start_index + 1))
-      {
-        start_index = result.indexOf(title.toLowerCase().substring(1), start_index + 1);
-        start_index--;
-        result = result.replaceRange(start_index, start_index+title.length, '________');
-      }
-      else
-      {
-        break;
-      }
-      start_index+=title.length;
-      if (result.length > start_index + 1)
-      {
-        break;
-      }
-    } 
-  }
-  else  //Если это само слово, а не его определение
-  { 
-    int start_index = 0;  //Убираем символы, окруженные пробелами (&,- и т.д.)
-    while ((result.contains(RegExp(' [^a-zA-Zа-яА-ЯёЁ] '), start_index)))
-    {
-      start_index = result.indexOf(RegExp(' [^a-zA-Zа-яА-ЯёЁ] '), start_index);
-      result = result.replaceRange(start_index, start_index+2, result.substring(start_index+1, start_index+2));
-    } 
-  }
-  result = result.replaceAll(RegExp('\\s\\s+'), ' '); //Удаление двойных пробелов
-  result = result.trim();
-  return result;
-}
-
-String TrimContent(String str, int target)  //Обрезать определение
+String TrimContent(String str, int target)  //Обрезать определение до первой точки
 {
   if (str.length < target)
   {
     return str;
   }
-  int ind = str.indexOf('.');
-  if (ind < target)
+  int i = 0;
+  while (i < str.length && str.contains('.', i))
   {
-    return str.substring(0, ind+1);
+    int ind = str.indexOf('.', i);
+    if (ind <= 10 || str.substring(ind-2, ind-1) == ' ' || str.substring(ind-2, ind-1) == '.')  //Если точка принадлежит инициалам
+    {
+      i = ind+1;
+    }
+    else if (ind < target)
+    {
+      return str.substring(0, ind+1);
+    }
+    else
+    {
+      break;
+    }
   }
+  
   var res = str.substring(0, target);
-  var end = res.lastIndexOf(' ');
+  var end = res.lastIndexOf(' '); //Заканчиваем определение на последнем пробеле
   res = res.replaceRange(end, null, '...');
   return res;
 }
 
 class Error { //Ошибка
   Error(this.cause);
+
+  @override
+  String toString()
+  {
+    return cause;
+  }
   String cause;
 }

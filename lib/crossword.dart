@@ -73,7 +73,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const CircularProgressIndicator(),
-                  Text('Загрузка... ${snapshot.data!.length}/$pool_size'),
+                  Text('Загрузка определений слов... ${snapshot.data!.length}/$pool_size'),
                 ],
               )
             ),
@@ -85,8 +85,8 @@ class CrosswordRouteState extends State<CrosswordRoute>
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(),
+                children: const [
+                  CircularProgressIndicator(),
                   Text('Получение ссылок...'),
                 ],
               )
@@ -177,7 +177,7 @@ class CrosswordPageState extends State<CrosswordPage> {
       {
         Words[word_ind].in_word = Words[word_ind].in_word.replaceRange(let_ind, let_ind + 1, '_');
       }
-      if (word_ind == chosen)
+      if (word_ind == chosen) //Переход к следующей букве
       {
         Words[word_ind].highlighted++;
       }
@@ -187,7 +187,7 @@ class CrosswordPageState extends State<CrosswordPage> {
       }
       crossword.field_words.setAll(0, Words);
     }); 
-    if (checkForWin() == Words.length)
+    if (checkForWin() == Words.length)  //Победа
     {
       Navigator.pushNamed(context, '/final', arguments: [0, Words.length, Words.length]);
     }
