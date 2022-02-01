@@ -80,9 +80,10 @@ class Word extends StatelessWidget {
 }
 
 class CellCross extends StatelessWidget { //Ячейка кроссворда
-  CellCross({ Key? key, required this.last, this.letter='A', this.pseudo_focused=false, required this.let_ind, required this.word_ind, required this.light_highlight, this.clone_ind = -1, this.clone_let_ind = -1}) : super(key: key);
+  CellCross({ Key? key, required this.last, this.letter='A', this.pseudo_focused=false, required this.let_ind, required this.word_ind, required this.light_highlight,
+    required this.mistake, this.clone_ind = -1, this.clone_let_ind = -1}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
-
+  final bool mistake; //Есть ли в этой ячейке ошибка
   final int let_ind;  //Индекс буквы
   final int word_ind; //Индекс слова
 
@@ -98,6 +99,8 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
   ValueNotifier <bool> notifier = ValueNotifier(false);
 
   final for_color = Colors.white; //Цвет фона ячейки
+  final mistake_color = Colors.red[200];
+  final mistake_hl_color = Colors.red[300]; //Цвет неправильной ячейки с подсветкой
   final sel_color = Colors.green[100]; //Цвет выбранной ячейки
   final light_color = Colors.lightGreen[50];  //Подсветка всего слова
   final _biggerFont = const TextStyle(fontSize: 40);
@@ -113,7 +116,6 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
   void setHighlighted(bool value)
   {
     pseudo_focused = value;
-    // notifier.value = value;
   }
 
   @override
@@ -122,7 +124,7 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
       width: 80,
       height: 80,
       child: Card(
-        color: (pseudo_focused)?sel_color:light_highlight?light_color:for_color, 
+        color: mistake?(pseudo_focused?mistake_hl_color:mistake_color):pseudo_focused?sel_color:light_highlight?light_color:for_color, 
         child: InkWell(
           focusNode: myFocusNode,
           onFocusChange: (bool f) {

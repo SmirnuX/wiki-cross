@@ -87,6 +87,7 @@ class _DefinitionState extends State<Definition> {
               focused: i == widget.index,
               clone_ind: _clone_ind,
               clone_let_ind: _clone_let_ind,
+              mistake: widget.source!.mistakes.contains(i),
             )
           );
         }
@@ -173,8 +174,10 @@ class _DefinitionState extends State<Definition> {
 
 class DefCross extends StatelessWidget {  //Ячейка в определении слова
   DefCross({ Key? key, required this.let_ind, required this.word_ind, required this.last, required this.letter,
-            required this.is_const, required this.focused, required this.clone_ind, required this.clone_let_ind}) : super(key: key); //Ячейка в определении слова
+            required this.is_const, required this.focused, required this.clone_ind, required this.clone_let_ind,
+            this.mistake = false}) : super(key: key); //Ячейка в определении слова
 
+  bool mistake;
   FocusNode myFocusNode = FocusNode();
   final int let_ind;  //Индекс буквы
   final int word_ind; //Индекс слова
@@ -189,7 +192,6 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
   String letter;  //Буква на этом месте
 
   var txt_controller = TextEditingController();
-  ValueNotifier <bool> notifier = ValueNotifier(false);
 
   final TextStyle Header_style = const TextStyle(
     fontSize: 30,
@@ -203,9 +205,11 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
 
   final for_color = Colors.white; //Цвет фона ячейки
   final sel_color = Colors.green[100]; //Цвет выбранной ячейки
+  final mistake_color = Colors.red[200];  //Цвет подсвеченной как неправильная ячейки
+  final mistake_hl_color = Colors.red[300]; //Цвет неправильной ячейки с подсветкой
   late CellFormatter txt_format = CellFormatter(node:myFocusNode, is_last:last);
 
-  void erase(BuildContext context)
+  void erase(BuildContext context)  //Стереть содержимое ячейки
   {
     var parent = CrosswordPage.of(context);
     if (parent != null)
@@ -229,7 +233,7 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
       child: Card(
         shadowColor: Colors.white,  //Убираем тень
         elevation: 0,
-        color: (focused)?sel_color:for_color, 
+        color: focused?(mistake?mistake_hl_color:sel_color):(mistake?mistake_color:for_color), 
         child: InkWell(
           focusNode: myFocusNode,
           onFocusChange: (bool f) {            

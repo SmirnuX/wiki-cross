@@ -66,7 +66,7 @@ Stream<List <Gen_Word>> RequestPool(int pageid, int target, int recursive_target
     }
     if (new_page.priority && add)  //Если новая страница подходит для включения в кроссворд
     {
-      var new_word = Gen_Word(word: new_page.title, weight: 0, definition: new_page.content);
+      var new_word = Gen_Word(word: new_page.title, weight: 0, definition: new_page.content, ext_definition: new_page.ext_content, pic_url: new_page.picture);
       result.add(new_word);
       final_pool.add(pool[i]);
       yield result;

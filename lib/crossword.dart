@@ -7,6 +7,7 @@ import 'package:wiki_cross/error.dart';
 import 'wiki.dart' as wiki;
 import 'crossgen.dart';
 import 'definition.dart';
+import 'dart:math';
 
 
 class CrosswordRoute extends StatefulWidget {
@@ -128,13 +129,43 @@ class CrosswordPageState extends State<CrosswordPage> {
   Widget build(BuildContext context) {
     var def = Definition(source: chosen == -1?Words[0]:Words[chosen], index: chosen_let, num: crossword.word_count);
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.red[400],
-        onPressed: () {
-          Navigator.pushNamed(context, '/final', arguments: [0, checkForWin(), Words.length]);
-        },
-        child: const Icon(Icons.close),),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+      appBar: AppBar(
+        leading: IconButton(  //Подведение итогов
+          onPressed: () {
+            Navigator.pushNamed(context, '/final', arguments: [0, checkForWin(), Words.length]);
+          },
+          icon: const Icon(Icons.close),
+        ),
+        actions: [  //Подсказки
+          IconButton(  //Вывод первого изображения из статьи
+            onPressed: () {
+              HelperShowPic(context);
+              print('picture');
+            },
+            color: Words[chosen].picture_url == '' ? Colors.grey : (Words[chosen].pic_showed ? Colors.green[100] : Colors.white),
+            icon: const Icon(Icons.photo),
+          ),
+          IconButton(  //Расширение описания
+            onPressed: () {
+              HelperExtendDef();
+            },
+            color: Words[chosen].ext_definition != '' ? Colors.white : Colors.grey,
+            icon: const Icon(Icons.text_snippet),
+          ),
+          IconButton(  //Раскраска кроссворда - неправильные буквы будут помечены красным, пока не будут изменены
+            onPressed: () {
+              HelperShowErrors();
+            },
+            icon: const Icon(Icons.color_lens),
+          ),
+          IconButton(  //Вставка правильной буквы в рандомную пустую клетку
+            onPressed: () {
+              HelperRandomLetters(3);
+            },
+            icon: const Icon(Icons.font_download),
+          ),
+        ],
+      ),
       bottomSheet: def,
       body: Builder(
         builder: (BuildContext context) {
@@ -142,6 +173,131 @@ class CrosswordPageState extends State<CrosswordPage> {
         }
       ),
     );
+  }
+
+  void HelperExtendDef()  //Расширение описания для выбранного слова
+  {
+    if (Words[chosen].ext_definition != '')
+    {
+      setState(() {
+        Words[chosen].definition = Words[chosen].ext_definition;
+        Words[chosen].ext_definition = '';
+      });
+    }
+  }
+
+  void HelperShowPic(BuildContext context)
+  {
+    if (Words[chosen].picture_url == '')
+    {
+      return;
+    }
+    Words[chosen].pic_showed = true;
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (context) { 
+        return Image.network(
+          Words[chosen].picture_url,
+        );
+      }
+    );
+  }
+
+  void HelperShowErrors()
+  {
+    setState(() {
+      for (int i = 0; i < Words[chosen].word.length; i++)
+      {
+        if (Words[chosen].word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))
+        {
+          continue;
+        }
+        else if (Words[chosen].word.substring(i, i+1) == Words[chosen].in_word.substring(i, i+1) || Words[chosen].in_word.substring(i, i+1) == '_')
+        {
+          continue;
+        }
+        else
+        {
+          Words[chosen].mistakes.add(i);  //Добавляем ошибку
+        }
+      }
+      for (var inter in Words[chosen].inters)
+      {
+        if (inter.source == chosen &&
+            Words[chosen].word.substring(inter.source_index, inter.source_index+1) != ' ' &&
+            !Words[chosen].word.substring(inter.source_index, inter.source_index+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")) &&
+            Words[chosen].word.substring(inter.source_index, inter.source_index+1) != Words[chosen].in_word.substring(inter.source_index, inter.source_index+1))
+        {
+          Words[inter.word].mistakes.add(inter.word_index);
+        }
+        else if (Words[chosen].word.substring(inter.word_index, inter.word_index+1) != ' ' &&
+                !Words[chosen].word.substring(inter.word_index, inter.word_index+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")) &&
+                Words[chosen].word.substring(inter.word_index, inter.word_index+1) != Words[chosen].in_word.substring(inter.word_index, inter.word_index+1))
+        {
+          Words[inter.source].mistakes.add(inter.source_index);
+        }
+      }
+    });
+  }
+
+  void HelperRandomLetters(int count) //Вставка count букв в случайные пустые либо неправильные места
+  {
+    setState(() {
+      //Поиск пустых и неправильных мест
+      List<int> empty = [];
+      List<int> wrong = [];
+      for (int i = 0; i < Words[chosen].word.length; i++)
+      {
+        if (Words[chosen].word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))
+        {
+          continue;
+        }
+        else if (Words[chosen].word.substring(i, i+1) != Words[chosen].in_word.substring(i, i+1)) //Неправильная ячейка
+        {
+          wrong.add(i);
+        }
+        else if (Words[chosen].in_word.substring(i, i+1) == '_')  //Пустая ячейка
+        {
+          empty.add(i);
+        }
+      }
+      Random rng = Random();
+      for (int i = 0; i < count; i++)
+      {
+        int ind;
+        if (empty.isNotEmpty)
+        {
+          ind = empty[rng.nextInt(empty.length)];
+          empty.remove(ind);
+        }
+        else if (wrong.isNotEmpty)
+        {
+          ind = wrong[rng.nextInt(wrong.length)];
+          wrong.remove(ind);
+        }
+        else
+        {
+          break;
+        }
+        //Непосредственно сама замена
+        ChangeLetter(Words[chosen].word.substring(ind, ind+1), chosen, ind);
+        for(var inter in Words[chosen].inters)
+        {
+
+          if (inter.source == chosen && inter.source_index == ind)
+          {
+            ChangeLetter(Words[chosen].word.substring(ind, ind+1), inter.word, inter.word_index);
+          }
+          else if (inter.word == chosen && inter.word_index == ind)
+          {
+            ChangeLetter(Words[chosen].word.substring(ind, ind+1), inter.source, inter.source_index);
+          }
+
+
+        }
+      }
+    });
   }
 
   void ChooseWord(int value, int second)
@@ -176,6 +332,10 @@ class CrosswordPageState extends State<CrosswordPage> {
       else
       {
         Words[word_ind].in_word = Words[word_ind].in_word.replaceRange(let_ind, let_ind + 1, '_');
+      }
+      if (Words[word_ind].mistakes.contains(let_ind))
+      {
+        Words[word_ind].mistakes.remove(let_ind);
       }
       if (word_ind == chosen) //Переход к следующей букве
       {

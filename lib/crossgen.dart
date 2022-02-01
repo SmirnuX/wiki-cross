@@ -64,7 +64,8 @@ class Gen_Crossword { //Сгенерированный кроссворд
     int buffer = 5; //Первые слова - выбираются из топ 5 слов
     int ind = rng.nextInt(buffer);
     bool first_hor = rng.nextBool();
-    field_words.add(Field_Word(hor: first_hor, word: words[ind].word, x: 0, y: 0, num: 0, definition:words[ind].definition));
+    field_words.add(Field_Word(hor: first_hor, word: words[ind].word, x: 0, y: 0, num: 0, definition:words[ind].definition, 
+      ext_definition: words[ind].ext_definition, picture_url: words[ind].pic_url));
     int min_x = 0, min_y = 0, max_x = first_hor?words[ind].word.length:1, max_y = !first_hor?words[ind].word.length:1;
     words.removeAt(ind);
     //2. Постепенный выбор новых слов и попытка их вставить в кроссворд
@@ -105,7 +106,9 @@ class Gen_Crossword { //Сгенерированный кроссворд
                 x: fword.hor? fword.x + lastFound : fword.x - i, 
                 y: fword.hor? fword.y - i : fword.y + lastFound,
                 num: new_ind,
-                definition: words[ind].definition));
+                definition: words[ind].definition,
+                ext_definition: words[ind].ext_definition,
+                picture_url: words[ind].pic_url));
               GetIntersections(field_words.length-1);
               if (fword.hor)
               {
@@ -323,13 +326,12 @@ class Gen_Crossword { //Сгенерированный кроссворд
       );
   }
 
-  Widget ToWidgetsHighlight(int word_ind, int let_ind, List<Field_Word> source) //Последующая сборка кроссворда (с указанием выбранного слова и ячейки)
+  Widget ToWidgetsHighlight(int word_ind, int let_ind, List<Field_Word> source) //Cборка кроссворда (с указанием выбранного слова и ячейки)
   {
     var word_inputs = <Word>[]; //Виджеты слов
     var positioned_words = <Positioned>[];  //Виджеты слов, расположенные на поле
     for (int i = 0; i < source.length; i++)
     {
-      
       word_inputs.add(CreateWord(source[i], word_ind));
       positioned_words.add(Positioned(
         child: word_inputs.last,
@@ -358,6 +360,8 @@ class Gen_Crossword { //Сгенерированный кроссворд
     var Cells = <Widget>[]; //Ячейки слова
     for (int i = 0; i < field.length; i++)
     {
+      //Проверка на подсветку ошибки
+      bool mistake = field.mistakes.contains(i);
       bool is_created = false;
       //1. Проверка на посторонние символы
       if (field.word.substring(i, i+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")))  //Посторонние символы
@@ -386,6 +390,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
             word_ind: field.num,
             light_highlight: field.num == word_highlight || inters.source == word_highlight,
             pseudo_focused: field.highlighted == i,
+            mistake: mistake,
           ));
           is_created = true;
         }
@@ -399,7 +404,8 @@ class Gen_Crossword { //Сгенерированный кроссворд
             let_ind: i,
             word_ind: field.num,
             light_highlight: field.num == word_highlight || inters.word == word_highlight,
-            pseudo_focused: field.highlighted == i
+            pseudo_focused: field.highlighted == i,
+            mistake: mistake,
           ));
           is_created = true;
         }
@@ -413,6 +419,7 @@ class Gen_Crossword { //Сгенерированный кроссворд
           word_ind: field.num,
           pseudo_focused: field.highlighted == i,
           light_highlight: field.num == word_highlight,
+          mistake: mistake,
           ),      
         );
       }
@@ -433,15 +440,17 @@ class Gen_Crossword { //Сгенерированный кроссворд
 }
 
 class Gen_Word {  //Структура для хранения слов, используемых в генерации кроссворда
-  Gen_Word ({required this.word, required this.weight, this.definition = ''});
+  Gen_Word ({required this.word, required this.weight, required this.definition, this.ext_definition = '', this.pic_url = ''});
   double weight = 0;  //Вес слова
   String word;  //Непосредственно само слово
   String definition;  //Определение слова
+  String ext_definition;
+  String pic_url;
 }
 
 class Field_Word {  //Слово, расположенное на поле
   Field_Word({required this.word, required this.hor, required this.x, required this.y, required this.num,
-              required this.definition})
+              required this.definition, this.ext_definition = '', this.picture_url = ''})
   {
     length = word.length;
     in_word = '';
@@ -461,6 +470,10 @@ class Field_Word {  //Слово, расположенное на поле
   String word;  //Непосредственно само слово
   late String in_word; //Введенное слово
   String definition;  //Определение этого слова
+  String ext_definition;  //Расширенное определение этого слова (может быть пустым)
+  String picture_url; //Ссылка на первое изображение этого слова (может быть пустым)
+  bool pic_showed = false;  //Было ли уже показано изображение
+  Set <int> mistakes = {}; //Ячейки, которые являются неправильными (подсвечиваются, если использована подсказка)
   int x, y;   //Координаты начала слова
   int num;  //Номер слова
   late int length; //Длина слова
