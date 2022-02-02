@@ -41,8 +41,8 @@ void main() {
           final selection = settings.arguments as List<dynamic>;
           return MaterialPageRoute(builder: (BuildContext context) {return GenRoute(pageid: selection[0], title: selection[1], lang_rus: selection[2],);}) ;
         case '/final':
-          final result = settings.arguments as List<int>;
-          return MaterialPageRoute(builder: (BuildContext context) {return FinalRoute(hints:result[0], right: result[1], all: result[2],);}) ;
+          final result = settings.arguments as List<dynamic>;
+          return MaterialPageRoute(builder: (BuildContext context) {return FinalRoute(hints:result[0], words: result[1]);}) ;
           break;
       }
     },

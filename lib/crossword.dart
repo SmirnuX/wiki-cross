@@ -117,10 +117,12 @@ class CrosswordPageState extends State<CrosswordPage> {
   List <Field_Word> Words = [];
   int chosen = 0;  //Выбранное слово
   int chosen_let = -1;  //Выбранная буква
+  int helper_count = 0;
   late Gen_Crossword crossword;
   @override
   void initState()
   {
+    super.initState();
     crossword = Gen_Crossword(widget.words, widget.size, widget.buf_inc);
     Words = crossword.GetWordList();
   }
@@ -132,21 +134,28 @@ class CrosswordPageState extends State<CrosswordPage> {
       appBar: AppBar(
         leading: IconButton(  //Подведение итогов
           onPressed: () {
-            Navigator.pushNamed(context, '/final', arguments: [0, checkForWin(), Words.length]);
+            Navigator.pushNamed(context, '/final', arguments: [helper_count, Words]);
           },
           icon: const Icon(Icons.close),
         ),
         actions: [  //Подсказки
           IconButton(  //Вывод первого изображения из статьи
             onPressed: () {
+              if (Words[chosen].picture_url != '' && !Words[chosen].pic_showed)
+              {
+                helper_count++;
+              }
               HelperShowPic(context);
-              print('picture');
             },
             color: Words[chosen].picture_url == '' ? Colors.grey : (Words[chosen].pic_showed ? Colors.green[100] : Colors.white),
             icon: const Icon(Icons.photo),
           ),
           IconButton(  //Расширение описания
             onPressed: () {
+              if (Words[chosen].ext_definition != '')
+              {
+                helper_count++;
+              }
               HelperExtendDef();
             },
             color: Words[chosen].ext_definition != '' ? Colors.white : Colors.grey,
@@ -349,7 +358,7 @@ class CrosswordPageState extends State<CrosswordPage> {
     }); 
     if (checkForWin() == Words.length)  //Победа
     {
-      Navigator.pushNamed(context, '/final', arguments: [0, Words.length, Words.length]);
+      Navigator.pushNamed(context, '/final', arguments: [helper_count, Words]);
     }
   }
 
