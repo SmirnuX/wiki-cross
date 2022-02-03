@@ -206,8 +206,22 @@ class CrosswordPageState extends State<CrosswordPage> {
       barrierDismissible: true,
       context: context,
       builder: (context) { 
-        return Image.network(
-          Words[chosen].picture_url,
+        return Dialog(
+          child: Stack(
+            children: [
+              Image.network(
+                Words[chosen].picture_url,
+              ),
+              PositionedDirectional(
+                top: 5,
+                end: 5,
+                child: IconButton(
+                  onPressed: () {Navigator.of(context).pop();},
+                  icon: const Icon(Icons.close, color: Colors.white,),
+                ),
+              )
+            ]
+          )
         );
       }
     );
@@ -302,8 +316,6 @@ class CrosswordPageState extends State<CrosswordPage> {
           {
             ChangeLetter(Words[chosen].word.substring(ind, ind+1), inter.source, inter.source_index);
           }
-
-
         }
       }
     });

@@ -1,30 +1,18 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-
-import 'dart:io' show Platform;
-import 'cells.dart';
-
-import 'crossgen.dart';
 import 'crossword.dart';
-import 'definition.dart';
-import 'wiki.dart' as wiki;
 import 'search.dart';
 import 'final.dart';
 import 'cross_settings.dart';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MaterialApp(
     title: 'Wiki Crossword',
     theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: Colors.tealAccent[100],
-      ),
+      primarySwatch: Colors.blueGrey,
+      primaryColor: Colors.amber[100]
+    ),
     initialRoute: '/',
     
     routes: {

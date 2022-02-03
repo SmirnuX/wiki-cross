@@ -75,7 +75,31 @@ class FinalRoute extends StatelessWidget {
 
               Text(right == all ? ' ' : 'Правильных слов: $right/$all') 
             ],),  
-            Stack(
+            words_list.isEmpty?const SizedBox.shrink() :ElevatedButton(
+              onPressed: () {
+                showDialog(context: context, builder: (context) {
+                  return DraggableScrollableSheet(
+                    expand: false,
+                    minChildSize: 0.5,
+                    maxChildSize: 0.8,
+                    initialChildSize: 0.5,
+                    builder: (BuildContext context, ScrollController scrollController) {
+                      return Dialog(
+                        backgroundColor: Colors.grey[50],
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: all-right,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(child: ListTile(title: words_list[index]));
+                          },
+                        )
+                      );
+                    }
+                  );
+                });
+              }, 
+              child: const Text('Показать неправильные слова')),
+            Stack(  //Кнопка возврата на главный экран
               alignment: Alignment.center, 
               children: [
                 Icon(Icons.circle, color: Colors.blue[200], size: 100),
@@ -90,26 +114,7 @@ class FinalRoute extends StatelessWidget {
             ),
           ]
         ),
-      ),
-      bottomSheet: words_list.isEmpty?null : DraggableScrollableSheet(
-        expand: false,
-
-        minChildSize: 0.3,
-        maxChildSize: 0.3,
-        initialChildSize: 0.3,
-        builder: (BuildContext context, ScrollController scrollController) {
-          return Container(
-            color: Colors.grey[100],
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: all-right,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(title: words_list[index]);
-              },
-            )
-          );
-        }
-      )
+      ),  
     );
   }
 }

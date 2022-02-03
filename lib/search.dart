@@ -12,6 +12,8 @@ class SearchRoute extends StatefulWidget //Страница поиска
   final TextStyle _bigger = const TextStyle(
     fontSize: 20,
   );
+
+  @override
   State<SearchRoute> createState() => _SearchRouteState();
 }
 
@@ -68,7 +70,8 @@ class _SearchTabState extends State<SearchTab> {
   @override
   void initState()
   {
-    search = null; Future.value(<String, String>{});  //Пустой список
+    search = null; 
+    // search = Future.value(<String, int>{});  //Пустой список
   }
 
   @override
@@ -76,10 +79,10 @@ class _SearchTabState extends State<SearchTab> {
     return Center(
       child: FutureBuilder(
         future: search,
-        initialData: <String, int> {},
+        initialData: const <String, int> {},
         builder: (BuildContext context, AsyncSnapshot<Map<String, int>> snapshot) {
           Widget result;
-          if (snapshot.connectionState == ConnectionState.done)
+          if (snapshot.connectionState == ConnectionState.done && snapshot.data != null)
           {
             if (snapshot.data!.isEmpty) //Если запрос не дал результата
             {
@@ -121,6 +124,10 @@ class _SearchTabState extends State<SearchTab> {
           else if(snapshot.connectionState == ConnectionState.none)
           {
             result = Center(child: Text('Введите название статьи из Википедии, по которой вы хотели бы начать кроссворд'),);
+          }
+          else if (snapshot.hasError)
+          {
+            result = Center(child: Text('Ошибка запроса: ${snapshot.error}'),);
           }
           else
           {
