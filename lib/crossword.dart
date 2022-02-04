@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:wiki_cross/error.dart';
+import 'package:wiki_cross/main.dart';
 import 'wiki.dart' as wiki;
 import 'crossgen.dart';
 import 'definition.dart';
@@ -12,10 +13,12 @@ import 'dart:math';
 
 class CrosswordRoute extends StatefulWidget {
   CrosswordRoute({Key? key, required this.pageid, required this.size, required this.diff, required this.lang_rus}) : super(key: key);
-  int pageid;
-  bool lang_rus;
-  int size;
-  int diff;
+  final int pageid;
+  final bool lang_rus;
+  final int size;
+  final int diff;
+
+  @override
   State<CrosswordRoute> createState() => CrosswordRouteState();
 }
 
@@ -29,6 +32,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
   @override
   void initState()
   {
+    super.initState();
     switch (widget.diff)
     {
       case 1: //Низкий уровень сложности
@@ -50,12 +54,11 @@ class CrosswordRouteState extends State<CrosswordRoute>
         buffer_inc = 5;
         break;
     }
-
     pool = wiki.RequestPool(widget.pageid, pool_size, recursive_links, widget.lang_rus, max_length);
   }
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(  //TODO - добавить анимации
+    return StreamBuilder(
       stream: pool,
       builder:(BuildContext context, AsyncSnapshot<List<Gen_Word>> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
@@ -73,7 +76,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(),
+                  CircularProgressIndicator(color: ColorTheme.GetLoadColor(context),),
                   Text('Загрузка определений слов... ${snapshot.data!.length}/$pool_size'),
                 ],
               )
@@ -86,9 +89,9 @@ class CrosswordRouteState extends State<CrosswordRoute>
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  Text('Получение ссылок...'),
+                children: [
+                  CircularProgressIndicator(color: ColorTheme.GetLoadColor(context),),
+                  const Text('Получение ссылок...'),
                 ],
               )
             ),
@@ -100,9 +103,9 @@ class CrosswordRouteState extends State<CrosswordRoute>
 }
 
 class CrosswordPage extends StatefulWidget {
-  CrosswordPage({UniqueKey? key, required this.words, required this.size, required this.buf_inc}) : super(key: key);
-  List <Gen_Word> words;
-  int size, buf_inc;
+  const CrosswordPage({UniqueKey? key, required this.words, required this.size, required this.buf_inc}) : super(key: key);
+  final List <Gen_Word> words;
+  final int size, buf_inc;
   @override
   State<CrosswordPage> createState() => CrosswordPageState();
 
@@ -132,11 +135,12 @@ class CrosswordPageState extends State<CrosswordPage> {
     var def = Definition(source: chosen == -1?Words[0]:Words[chosen], index: chosen_let, num: crossword.word_count);
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: ColorTheme.GetAppBarColor(context),
         leading: IconButton(  //Подведение итогов
           onPressed: () {
             Navigator.pushNamed(context, '/final', arguments: [helper_count, Words]);
           },
-          icon: const Icon(Icons.close),
+          icon: Icon(Icons.close, color: ColorTheme.GetTextColor(context),),
         ),
         actions: [  //Подсказки
           IconButton(  //Вывод первого изображения из статьи
@@ -147,7 +151,8 @@ class CrosswordPageState extends State<CrosswordPage> {
               }
               HelperShowPic(context);
             },
-            color: Words[chosen].picture_url == '' ? Colors.grey : (Words[chosen].pic_showed ? Colors.green[100] : Colors.white),
+            color: Words[chosen].picture_url == '' ? ColorTheme.GetUnavailHintColor(context)
+                 : (Words[chosen].pic_showed ? ColorTheme.GetUsedHintColor(context) : ColorTheme.GetAvailHintColor(context)),
             icon: const Icon(Icons.photo),
           ),
           IconButton(  //Расширение описания
@@ -158,19 +163,21 @@ class CrosswordPageState extends State<CrosswordPage> {
               }
               HelperExtendDef();
             },
-            color: Words[chosen].ext_definition != '' ? Colors.white : Colors.grey,
+            color: Words[chosen].ext_definition != '' ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
             icon: const Icon(Icons.text_snippet),
           ),
           IconButton(  //Раскраска кроссворда - неправильные буквы будут помечены красным, пока не будут изменены
             onPressed: () {
               HelperShowErrors();
             },
+            color: ColorTheme.GetAvailHintColor(context),
             icon: const Icon(Icons.color_lens),
           ),
           IconButton(  //Вставка правильной буквы в рандомную пустую клетку
             onPressed: () {
               HelperRandomLetters(3);
             },
+            color: ColorTheme.GetAvailHintColor(context),
             icon: const Icon(Icons.font_download),
           ),
         ],
@@ -196,12 +203,14 @@ class CrosswordPageState extends State<CrosswordPage> {
   }
 
   void HelperShowPic(BuildContext context)
-  {
+  {  
     if (Words[chosen].picture_url == '')
     {
       return;
     }
-    Words[chosen].pic_showed = true;
+    setState(() {
+      Words[chosen].pic_showed = true;
+    }); 
     showDialog(
       barrierDismissible: true,
       context: context,

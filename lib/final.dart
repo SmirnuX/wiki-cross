@@ -3,13 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:wiki_cross/crossgen.dart';
 import 'crossgen.dart';
+import 'main.dart';
 
 class FinalRoute extends StatelessWidget {
-  FinalRoute({ Key? key, this.hints : 0, required this.words}) : super(key: key)
+  FinalRoute({ Key? key, this.hints = 0, required this.words}) : super(key: key)
   {
     TextStyle wrong_st = TextStyle(fontSize: 20, color: Colors.red[400]);
     TextStyle right_st = TextStyle(fontSize: 20, color: Colors.green[400]);
-    print('building final');
     all = words.length;
     right = 0;
     List<Widget> wrong_words = [];
@@ -49,11 +49,11 @@ class FinalRoute extends StatelessWidget {
       }
     }
   }
-  int hints;
+  final int hints;
   late int right;
   late int all;
   List<Widget> words_list = [];
-  List<Field_Word> words;
+  final List<Field_Word> words;
 
   @override
     Widget build(BuildContext context) {
@@ -62,7 +62,7 @@ class FinalRoute extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text(right == all ? 'Кроссворд решен' : 'Кроссворд не решен', style: const TextStyle(fontSize: 25),),
+            Text(right == all ? 'Кроссворд решен' : 'Кроссворд не решен', style: TextStyle(fontSize: 25, color: ColorTheme.GetTextColor(context)),),
             Stack(
               alignment: Alignment.center,
               children: [
@@ -72,10 +72,12 @@ class FinalRoute extends StatelessWidget {
             ),
             Column(children: [
               Text('Подсказок использовано: $hints'),
-
               Text(right == all ? ' ' : 'Правильных слов: $right/$all') 
             ],),  
             words_list.isEmpty?const SizedBox.shrink() :ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(ColorTheme.GetCellColor(context)),
+              ),
               onPressed: () {
                 showDialog(context: context, builder: (context) {
                   return DraggableScrollableSheet(
@@ -85,7 +87,7 @@ class FinalRoute extends StatelessWidget {
                     initialChildSize: 0.5,
                     builder: (BuildContext context, ScrollController scrollController) {
                       return Dialog(
-                        backgroundColor: Colors.grey[50],
+                        backgroundColor: ColorTheme.GetBackColor(context),
                         child: ListView.builder(
                           controller: scrollController,
                           itemCount: all-right,
@@ -98,17 +100,17 @@ class FinalRoute extends StatelessWidget {
                   );
                 });
               }, 
-              child: const Text('Показать неправильные слова')),
+              child: Text('Показать неправильные слова', style: TextStyle(color: ColorTheme.GetTextColor(context)),)),
             Stack(  //Кнопка возврата на главный экран
               alignment: Alignment.center, 
               children: [
-                Icon(Icons.circle, color: Colors.blue[200], size: 100),
+                Icon(Icons.circle, color: ColorTheme.GetROCellColor(context), size: 100),
                 IconButton(
                   onPressed: () {Navigator.pushNamed(context, '/');}, 
                   iconSize: 60,
                   padding: const EdgeInsets.all(0) ,
                   alignment: Alignment.center,
-                  icon: const Icon (Icons.home, color: Colors.white)
+                  icon: Icon (Icons.home, color: ColorTheme.GetTextColor(context))
                 )   
               ],
             ),

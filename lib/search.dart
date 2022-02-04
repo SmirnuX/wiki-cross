@@ -7,11 +7,11 @@ import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'main.dart';
+
 class SearchRoute extends StatefulWidget //Страница поиска
 {
-  final TextStyle _bigger = const TextStyle(
-    fontSize: 20,
-  );
+  const SearchRoute({ Key? key}) : super(key: key);
 
   @override
   State<SearchRoute> createState() => _SearchRouteState();
@@ -33,20 +33,22 @@ class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStat
       appBar: AppBar(
         bottom: TabBar  //Вкладки
         (
+          indicatorColor: ColorTheme.GetTextColor(context),
           controller: tab_controller,
-          tabs: const [
+          tabs: [
             Tab(
-              icon: Icon(Icons.search),
+              icon: Icon(Icons.search, color: ColorTheme.GetTextColor(context)),
             ),
             Tab(
-              icon: Icon(Icons.photo_size_select_actual_rounded),
+              icon: Icon(Icons.photo_size_select_actual_rounded, color: ColorTheme.GetTextColor(context)),
             ),
           ],
-        ) 
+        ),
+        backgroundColor: ColorTheme.GetAppBarColor(context), 
       ),
       body: TabBarView(
         controller: tab_controller,
-        children:[
+        children:const [
           SearchTab(),
           Text('Темы')  //Темы
         ]
@@ -70,8 +72,8 @@ class _SearchTabState extends State<SearchTab> {
   @override
   void initState()
   {
+    super.initState();
     search = null; 
-    // search = Future.value(<String, int>{});  //Пустой список
   }
 
   @override
@@ -123,7 +125,9 @@ class _SearchTabState extends State<SearchTab> {
           }
           else if(snapshot.connectionState == ConnectionState.none)
           {
-            result = Center(child: Text('Введите название статьи из Википедии, по которой вы хотели бы начать кроссворд'),);
+            result = const Padding(
+              padding: EdgeInsets.all(8),
+              child: Center(child: Text('Введите название статьи из Википедии, по которой вы хотели бы начать кроссворд'),));
           }
           else if (snapshot.hasError)
           {
@@ -131,7 +135,7 @@ class _SearchTabState extends State<SearchTab> {
           }
           else
           {
-            result = CircularProgressIndicator();
+            result = CircularProgressIndicator(color: ColorTheme.GetLoadColor(context));
           }
           return Column(
             children: [
@@ -139,11 +143,11 @@ class _SearchTabState extends State<SearchTab> {
                 alignment: Alignment.topCenter,
                 heightFactor: 1,
                 child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   child:Row(
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16, 8, 2, 8),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 2, 8),
                         child: IconButton(
                           splashRadius: 28,
                           icon: Container(
@@ -153,7 +157,7 @@ class _SearchTabState extends State<SearchTab> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5.0),
                               border: Border.all(
-                                color: Colors.black,
+                                color: ColorTheme.GetTextColor(context),
                                 width: 2,
                               ),
                             ),
@@ -166,10 +170,10 @@ class _SearchTabState extends State<SearchTab> {
                         )
                       ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(2, 8, 8, 8),
+                        padding: const EdgeInsets.fromLTRB(2, 8, 8, 8),
                         child: IconButton(
                           splashRadius: 28,
-                          icon: Icon(Icons.casino_outlined),  
+                          icon: Icon(Icons.casino_outlined, color: ColorTheme.GetTextColor(context)),  
                           onPressed: () {
                             setState(() {
                               search = SearchRandom(language_rus);
@@ -179,8 +183,9 @@ class _SearchTabState extends State<SearchTab> {
                       ),
                       Expanded(
                         child: Padding(
-                          padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
                           child:TextField(
+                            cursorColor: ColorTheme.GetTextColor(context),
                             decoration: null,
                             onChanged: (str) {
                               query = str;
@@ -197,11 +202,11 @@ class _SearchTabState extends State<SearchTab> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(8, 8, 16, 8),
+                        padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
                         child: snapshot.connectionState == ConnectionState.done || snapshot.connectionState == ConnectionState.none ? 
                         IconButton(
                           splashRadius: 28,
-                          icon: Icon(Icons.search),
+                          icon: Icon(Icons.search, color: ColorTheme.GetTextColor(context)),
                           onPressed: () {
                             setState(() {
                               if (query != '')
@@ -211,7 +216,7 @@ class _SearchTabState extends State<SearchTab> {
                             });
                           },
                         ) :
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color: ColorTheme.GetLoadColor(context))
                       ),
                     ]
                   ) 

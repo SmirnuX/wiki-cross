@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 
 import 'package:wiki_cross/crossgen.dart';
 import 'crossword.dart';
+import 'main.dart';
 
 class Word extends StatelessWidget {
   const Word ({ Key? key, required this.hor, required this.children, required this.parent, required this.index}) : super(key: key);
@@ -90,19 +91,13 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
   final bool light_highlight; //Подсветка всего слова
   bool pseudo_focused;  //Подсветка буквы (когда фокус на перекрывающем элементе)
   
-  String letter;  //Буква на этом месте
+  final String letter;  //Буква на этом месте
 
   final int clone_ind;  //Индекс слова перекрывающей/перекрытой ячейки [-1]
   final int clone_let_ind;  //Индекс непосредственно ячейки [-1]
 
   var txt_controller = TextEditingController();
-  ValueNotifier <bool> notifier = ValueNotifier(false);
 
-  final for_color = Colors.white; //Цвет фона ячейки
-  final mistake_color = Colors.red[200];
-  final mistake_hl_color = Colors.red[300]; //Цвет неправильной ячейки с подсветкой
-  final sel_color = Colors.green[100]; //Цвет выбранной ячейки
-  final light_color = Colors.lightGreen[50];  //Подсветка всего слова
   final _biggerFont = const TextStyle(fontSize: 40);
   late CellFormatter txt_format = CellFormatter(node:myFocusNode, is_last:last);
 
@@ -124,7 +119,9 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
       width: 80,
       height: 80,
       child: Card(
-        color: mistake?(pseudo_focused?mistake_hl_color:mistake_color):pseudo_focused?sel_color:light_highlight?light_color:for_color, 
+        color: mistake?
+        (pseudo_focused?ColorTheme.GetHLWrongCellColor(context):ColorTheme.GetWrongCellColor(context))
+        :pseudo_focused?ColorTheme.GetHLCellColor(context):light_highlight?ColorTheme.GetLightHLCellColor(context):ColorTheme.GetCellColor(context), 
         child: InkWell(
           focusNode: myFocusNode,
           onFocusChange: (bool f) {
@@ -155,7 +152,7 @@ class CellCross extends StatelessWidget { //Ячейка кроссворда
                   autocorrect: false,
                   enableSuggestions: false,
                   enableIMEPersonalizedLearning: false,
-                  cursorColor: (myFocusNode.hasFocus)?sel_color:for_color,
+                  // cursorColor: (myFocusNode.hasFocus)?sel_color:for_color,
                   showCursor: false,
                   // focusNode: myFocusNode,
                   textInputAction: TextInputAction.next,
@@ -193,7 +190,6 @@ class ReadOnlyCell extends StatelessWidget { //Ячейка кроссворда
   ReadOnlyCell({ Key? key, required this.last, this.letter='A'}) : super(key: key);
   final bool last; //Является ли данная ячейка последней?
   final String letter;  //Буква на этом месте
-  final for_color = Colors.grey[200];
   final _biggerFont = const TextStyle(fontSize: 40);
   var myFocusNode = FocusNode();
 
@@ -203,7 +199,7 @@ class ReadOnlyCell extends StatelessWidget { //Ячейка кроссворда
       width: 80,
       height: 80,
       child: Card(
-        color: for_color, 
+        color: ColorTheme.GetROCellColor(context), 
         child: InkWell(
           onFocusChange: (bool f) {
             if (f) {

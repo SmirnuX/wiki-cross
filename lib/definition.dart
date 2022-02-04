@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:wiki_cross/main.dart';
 
 import 'crossword.dart';
 import 'crossgen.dart';
@@ -12,27 +13,9 @@ class Definition extends StatefulWidget {
   Field_Word? source;
   int index;
   int num;
-  final TextStyle Header_style = const TextStyle(
-    fontSize: 30,
-    fontFamily: 'Arial'
-  );
-  final TextStyle Header_const_style = TextStyle(
-    fontSize: 30,
-    fontFamily: 'TimesNewRoman',
-    color: Colors.grey[400],
-  );
-  final TextStyle Header_focus_style = TextStyle(
-    fontSize: 30,
-    fontFamily: 'TimesNewRoman',
-    backgroundColor: Colors.lightGreen[300],
-  );
 
   final TextStyle Definit_style = const TextStyle(
     fontSize: 20
-  );
-  final Counter_style = const TextStyle(
-    color: Colors.black,
-    fontSize: 18,
   );
 
   @override
@@ -110,27 +93,28 @@ class _DefinitionState extends State<Definition> {
                 Chip( 
                   label:SizedBox(
                     height: 25,
+                    width: 40,
                     child: Text(
                     (widget.source==null)?'':'${widget.source!.num+1}/${widget.num}',
-                    style: widget.Counter_style,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: ColorTheme.GetTextColor(context)
+                    )
                   ))
                 ),
                 Chip( 
                   label: SizedBox(
                     height: 25,
+                    width: 40,
                     child: IconButton(
                     padding: EdgeInsets.zero,
                     iconSize: 18,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete,
-                      color: Colors.black,
+                      color: ColorTheme.GetTextColor(context),
                     ),
                     onPressed: () {
-                      // var parent = CrosswordPage.of(context);
-                      // if (parent != null && widget.source != null)
-                      // {
-                      //   parent.EraseWord(widget.source!.num);
-                      // }
+
                       for (var a in res)
                       {
                         a.erase(context);
@@ -203,10 +187,6 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
     color: Colors.grey[400],
   );
 
-  final for_color = Colors.white; //Цвет фона ячейки
-  final sel_color = Colors.green[100]; //Цвет выбранной ячейки
-  final mistake_color = Colors.red[200];  //Цвет подсвеченной как неправильная ячейки
-  final mistake_hl_color = Colors.red[300]; //Цвет неправильной ячейки с подсветкой
   late CellFormatter txt_format = CellFormatter(node:myFocusNode, is_last:last);
 
   void erase(BuildContext context)  //Стереть содержимое ячейки
@@ -233,7 +213,8 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
       child: Card(
         shadowColor: Colors.white,  //Убираем тень
         elevation: 0,
-        color: focused?(mistake?mistake_hl_color:sel_color):(mistake?mistake_color:for_color), 
+        color: focused?(mistake?ColorTheme.GetHLWrongCellColor(context):ColorTheme.GetHLCellColor(context)):
+              (mistake?ColorTheme.GetWrongCellColor(context):ColorTheme.GetCellColor(context)), 
         child: InkWell(
           focusNode: myFocusNode,
           onFocusChange: (bool f) {            
@@ -269,7 +250,7 @@ class DefCross extends StatelessWidget {  //Ячейка в определени
                   autocorrect: false,
                   enableSuggestions: false,
                   enableIMEPersonalizedLearning: false,
-                  cursorColor: (focused)?sel_color:for_color,
+                  cursorColor: (focused)?ColorTheme.GetHLCellColor(context):ColorTheme.GetCellColor(context),
                   showCursor: false,
                   textInputAction: TextInputAction.next,
                   controller: txt_controller,
