@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:wiki_cross/main.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class GenRoute extends StatefulWidget {
   const GenRoute({ Key? key, required this.pageid, required this.title, required this.lang_rus }) : super(key: key);
   final String title;
@@ -24,14 +26,14 @@ class _GenRouteState extends State<GenRoute> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Column(children: [
-              const Text('Выбранная тема:'),
-              Text(widget.title, style: const TextStyle(fontSize: 25), softWrap: true,),
+              Text(AppLocalizations.of(context)!.chosenTheme),
+              Text(widget.title, style: const TextStyle(fontSize: 25), softWrap: true, textAlign: TextAlign.center,),
             ],),        
             Column(children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                const Text('Размер:'),
+                Text(AppLocalizations.of(context)!.size),
                 Slider(
                   onChanged: (value) {
                     setState(() {
@@ -39,10 +41,10 @@ class _GenRouteState extends State<GenRoute> {
                     });  
                   },
                   value: size.toDouble(),
-                  divisions: 3,
+                  divisions: 2,
                   label: '$size',
                   min: 5,
-                  max: 20,
+                  max: 15,
                   activeColor: ColorTheme.GetLoadColor(context),
                   inactiveColor: ColorTheme.GetUnavailHintColor(context)
                 )
@@ -50,7 +52,7 @@ class _GenRouteState extends State<GenRoute> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                const Text('Сложность:'),
+                Text(AppLocalizations.of(context)!.difficulty),
                 Slider(
                   onChanged: (value) {
                     setState(() {
@@ -59,7 +61,7 @@ class _GenRouteState extends State<GenRoute> {
                   },
                   value: difficulty.toDouble(),
                   divisions: 2,
-                  label: difficulty == 1? 'Низкая' : (difficulty == 2 ? 'Средняя' : 'Высокая'),
+                  label: difficulty == 1? AppLocalizations.of(context)!.diffLow : (difficulty == 2 ? AppLocalizations.of(context)!.diffMedium : AppLocalizations.of(context)!.diffHard),
                   min: 1,
                   max: 3,
                   activeColor: ColorTheme.GetLoadColor(context),

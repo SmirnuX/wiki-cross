@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'main.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ErrorRoute extends StatelessWidget {
   ErrorRoute({ Key? key, required this.error }) : super(key: key);
@@ -12,7 +13,7 @@ class ErrorRoute extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const Text('Ошибка', style: TextStyle(fontSize: 25, color: ColorTheme.TextColor),),
+            Text(AppLocalizations.of(context)!.error, style: TextStyle(fontSize: 25, color: ColorTheme.GetTextColor(context)),),
             Stack(
               alignment: Alignment.center,
               children: const [
@@ -20,7 +21,7 @@ class ErrorRoute extends StatelessWidget {
               ],
             ),
             Column(children: [
-              Text(error != '' ? error : 'Произошла неизвестная ошибка.'),
+              Text(error != '' ? error : AppLocalizations.of(context)!.errorUnknown),
             ],),  
             Stack(
               alignment: Alignment.center, 

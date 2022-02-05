@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:wiki_cross/crossgen.dart';
 import 'crossgen.dart';
 import 'main.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FinalRoute extends StatelessWidget {
   FinalRoute({ Key? key, this.hints = 0, required this.words}) : super(key: key)
@@ -62,7 +63,8 @@ class FinalRoute extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text(right == all ? 'Кроссворд решен' : 'Кроссворд не решен', style: TextStyle(fontSize: 25, color: ColorTheme.GetTextColor(context)),),
+            Text(right == all ? AppLocalizations.of(context)!.crossSolved : AppLocalizations.of(context)!.crossNotSolved, 
+                                style: TextStyle(fontSize: 25, color: ColorTheme.GetTextColor(context)),),
             Stack(
               alignment: Alignment.center,
               children: [
@@ -71,8 +73,8 @@ class FinalRoute extends StatelessWidget {
               ],
             ),
             Column(children: [
-              Text('Подсказок использовано: $hints'),
-              Text(right == all ? ' ' : 'Правильных слов: $right/$all') 
+              Text('${AppLocalizations.of(context)!.hintsUsed} $hints'),
+              Text(right == all ? ' ' : '${AppLocalizations.of(context)!.rightWords} $right/$all') 
             ],),  
             words_list.isEmpty?const SizedBox.shrink() :ElevatedButton(
               style: ButtonStyle(
@@ -100,7 +102,7 @@ class FinalRoute extends StatelessWidget {
                   );
                 });
               }, 
-              child: Text('Показать неправильные слова', style: TextStyle(color: ColorTheme.GetTextColor(context)),)),
+              child: Text(AppLocalizations.of(context)!.showWrongWords, style: TextStyle(color: ColorTheme.GetTextColor(context)),)),
             Stack(  //Кнопка возврата на главный экран
               alignment: Alignment.center, 
               children: [

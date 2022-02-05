@@ -176,10 +176,10 @@ Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, boo
     short_desc = full_desc.substring(0, full_desc.indexOf('.'));
   }
 
-  print(result['title']);
-  print(new_title);
-  print(short_desc);
-  print(full_desc);
+  // print(result['title']);
+  // print(new_title);
+  // print(short_desc);
+  // print(full_desc);
   
   String pic_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос изображения
     '/w/api.php?action=query&format=json&origin=*&prop=pageimages&pilimit=1&piprop=thumbnail&pithumbsize=600&pageids=' + pageid.toString();

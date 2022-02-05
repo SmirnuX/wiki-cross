@@ -10,6 +10,7 @@ import 'crossgen.dart';
 import 'definition.dart';
 import 'dart:math';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CrosswordRoute extends StatefulWidget {
   const CrosswordRoute({Key? key, required this.pageid, required this.size, required this.diff, required this.lang_rus}) : super(key: key);
@@ -81,7 +82,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(color: ColorTheme.GetLoadColor(context),),
-                  Text('Загрузка определений слов... ${snapshot.data!.length}/$pool_size'),
+                  Text('${AppLocalizations.of(context)!.downloadingDefinitions} ${snapshot.data!.length}/$pool_size'),
                 ],
               )
             ),
@@ -95,7 +96,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(color: ColorTheme.GetLoadColor(context),),
-                  const Text('Получение ссылок...'),
+                  Text(AppLocalizations.of(context)!.gettingLinks),
                 ],
               )
             ),
@@ -170,7 +171,7 @@ class CrosswordPageState extends State<CrosswordPage> {
             },
             color: (Words[chosen].picture_url == '' || (help_pic_count <= 0 && !Words[chosen].pic_showed)) ? ColorTheme.GetUnavailHintColor(context)
                  : (Words[chosen].pic_showed ? ColorTheme.GetUsedHintColor(context) : ColorTheme.GetAvailHintColor(context)),
-            tooltip: "Осталось $help_pic_count",
+            tooltip: "${AppLocalizations.of(context)!.hintsLeft} $help_pic_count",
             icon: const Icon(Icons.photo),                             
           ),
           IconButton(  //Расширение описания
@@ -185,7 +186,7 @@ class CrosswordPageState extends State<CrosswordPage> {
               }     
             },
             color: (Words[chosen].ext_definition != '' && help_desc_count > 0) ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
-            tooltip: "Осталось $help_desc_count",
+            tooltip: "${AppLocalizations.of(context)!.hintsLeft} $help_desc_count",
             icon: const Icon(Icons.text_snippet),
           ),
           IconButton(  //Раскраска кроссворда - неправильные буквы будут помечены красным, пока не будут изменены
@@ -200,7 +201,7 @@ class CrosswordPageState extends State<CrosswordPage> {
               }   
             },
             color: (help_err_count > 0) ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
-            tooltip: "Осталось $help_err_count",
+            tooltip: "${AppLocalizations.of(context)!.hintsLeft} $help_err_count",
             icon: const Icon(Icons.color_lens),
           ),
           IconButton(  //Вставка правильной буквы в рандомную пустую клетку
@@ -215,7 +216,7 @@ class CrosswordPageState extends State<CrosswordPage> {
               }
             },
             color: (help_let_count > 0) ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
-            tooltip: "Осталось $help_let_count",
+            tooltip: "${AppLocalizations.of(context)!.hintsLeft} $help_let_count",
             icon: const Icon(Icons.font_download),
           ),
         ],

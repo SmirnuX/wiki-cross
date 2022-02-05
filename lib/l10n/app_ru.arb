@@ -1,0 +1,23 @@
+{
+    "helloWorld": "Привет мир!",
+    "navError": "Ошибка навигации - не удалось найти маршрут по умолчанию.",
+    "downloadingDefinitions": "Получение определений...",
+    "gettingLinks": "Получение ссылок...",
+    "hintsLeft": "Подсказок осталось:",
+    "searchNoResults": "По запросу ничего не найдено",
+    "searchEnterQuery": "Введите наименование искомой статьи в Википедии",
+    "searchError": "Ошибка поиска: ",
+    "chosenTheme": "Выбранная тема",
+    "size": "Размер",
+    "difficulty": "Сложность",
+    "diffLow": "Низкий",
+    "diffMedium": "Средний",
+    "diffHard": "Высокий",
+    "error": "Ошибка",
+    "errorUnknown": "Неизвестная ошибка",
+    "crossSolved": "Кроссворд решен",
+    "crossNotSolved": "Кроссворд не решен",
+    "hintsUsed": "Подсказок использовано:",
+    "rightWords": "Правильные слова:",
+    "showWrongWords": "Показать неправильные слова"
+}

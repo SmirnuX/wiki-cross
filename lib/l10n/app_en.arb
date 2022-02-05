@@ -1,0 +1,107 @@
+{
+    "helloWorld": "Hello World!",
+    "@helloWorld": {
+      "description": "The conventional newborn programmer greeting"
+    },
+
+    "navError": "Navigator error - couldn't find default route.",
+    "@navError": {
+      "description": "Error occured when there's no initial route."
+    },
+
+    "downloadingDefinitions": "Getting definitions...",
+    "@downloadingDefinitions": {
+      "description": "One of loading messages."
+    },
+
+    "gettingLinks": "Getting links...",
+    "@downloadingDefinitions": {
+      "description": "One of loading messages."
+    },
+
+    "hintsLeft": "Hints left:",
+    "@hintsLeft": {
+      "description": "Tooltip with count of hints"
+    },
+
+    "searchNoResults": "Nothing found.",
+    "@searchNoResults": {
+      "description": "Message returned, if there is no articles in query response."
+    },
+
+    "searchEnterQuery": "Enter title of Wikipedia article",
+    "@searchEnterQuery": {
+      "description": "Prompt to enter the title."
+    },
+
+    "searchError": "Search error: ",
+    "@searchError": {
+      "description": "Message, if error happened during query."
+    },
+
+    "chosenTheme": "Chosen theme",
+    "@chosenTheme": {
+      "description": ""
+    },
+
+    "size": "Size",
+    "@size": {
+      "description": ""
+    },
+
+
+    "difficulty": "Difficulty",
+    "@difficulty": {
+      "description": ""
+    },
+
+    "diffLow": "Low",
+    "@diffLow": {
+      "description": ""
+    },
+
+    "diffMedium": "Medium",
+    "@diffMedium": {
+      "description": ""
+    },
+
+    "diffHard": "Hard",
+    "@diffHard": {
+      "description": ""
+    },
+
+    "error": "Error",
+    "@error": {
+      "description": ""
+    },
+
+    "errorUnknown": "Unknown error",
+    "@errorUnknown": {
+      "description": ""
+    },
+
+    "crossSolved": "Crossword solved",
+    "@crossSolved": {
+      "description": ""
+    },
+
+    "crossNotSolved": "Crossword not solved",
+    "@crossNotSolved": {
+      "description": ""
+    },
+
+    "hintsUsed": "Hints used:",
+    "@hintsUsed": {
+      "description": ""
+    },
+
+    "rightWords": "Right words:",
+    "@rightWords": {
+      "description": ""
+    },
+
+    "showWrongWords": "Show wrong words",
+    "@showWrongWords": {
+      "description": ""
+    }
+}

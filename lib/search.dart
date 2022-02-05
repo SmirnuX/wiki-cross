@@ -7,6 +7,9 @@ import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'main.dart';
 
 class SearchRoute extends StatefulWidget //Страница поиска
@@ -67,12 +70,13 @@ class SearchTab extends StatefulWidget {  //Вкладка поиска
 class _SearchTabState extends State<SearchTab> {
   late Future<Map<String, int>>? search; //Результаты поиска
   TextStyle header_style = const TextStyle(fontSize: 25);
-  bool language_rus = true;
+  late bool language_rus;
   String query = '';
   @override
   void initState()
   {
     super.initState();
+    language_rus = true;
     search = null; 
   }
 
@@ -88,12 +92,17 @@ class _SearchTabState extends State<SearchTab> {
           {
             if (snapshot.data!.isEmpty) //Если запрос не дал результата
             {
-              result = (Column(
-               children: const [
-                 Icon(Icons.cancel, color: Colors.red,),
-                 Text('По вашему запросу ничего не найдено.')
-               ] 
-              ));
+              result = (
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.cancel, color: Colors.red,),
+                      Text(AppLocalizations.of(context)!.searchNoResults)
+                    ] 
+                  )
+                )
+              );
             }
             else  //Выдача списка
             {
@@ -125,13 +134,13 @@ class _SearchTabState extends State<SearchTab> {
           }
           else if(snapshot.connectionState == ConnectionState.none)
           {
-            result = const Padding(
-              padding: EdgeInsets.all(8),
-              child: Center(child: Text('Введите название статьи из Википедии, по которой вы хотели бы начать кроссворд'),));
+            result = Padding(
+              padding: const EdgeInsets.all(8),
+              child: Center(child: Text(AppLocalizations.of(context)==null?'':AppLocalizations.of(context)!.searchEnterQuery),));
           }
           else if (snapshot.hasError)
           {
-            result = Center(child: Text('Ошибка запроса: ${snapshot.error}'),);
+            result = Center(child: Text('${AppLocalizations.of(context)!.searchError}: ${snapshot.error}'),);
           }
           else
           {
@@ -234,8 +243,8 @@ class _SearchTabState extends State<SearchTab> {
 Future <Map<String, int>> SearchWiki(String query, bool is_rus) async
 {
   Uri url = Uri.parse(is_rus
-                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json&origin=*'
-                      :'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json&origin=*');
+                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=$query&srlimit=10&srnamespace=0&format=json&origin=*'
+                      :'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=$query&srlimit=10&srnamespace=0&format=json&origin=*');
   http.Response response = await http.get(url);
   if (response.statusCode != 200)
   {
