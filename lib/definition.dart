@@ -96,9 +96,10 @@ class _DefinitionState extends State<Definition> {
                     width: 40,
                     child: Text(
                     (widget.source==null)?'':'${widget.source!.num+1}/${widget.num}',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
-                      color: ColorTheme.GetTextColor(context)
+                      color: ColorTheme.GetTextColor(context),
                     )
                   ))
                 ),

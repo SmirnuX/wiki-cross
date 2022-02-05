@@ -29,6 +29,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
   late int recursive_links;
   late int max_length;
   late int buffer_inc;  //Увеличение буфера с каждым шагом
+  late int help_count;
   @override
   void initState()
   {
@@ -36,22 +37,25 @@ class CrosswordRouteState extends State<CrosswordRoute>
     switch (widget.diff)
     {
       case 1: //Низкий уровень сложности
-        pool_size = 4 * widget.size;
-        recursive_links = 1;
-        max_length = 12;
-        buffer_inc = 1;
+        pool_size = 3 * widget.size;
+        recursive_links = (widget.size >= 15) ? 2 : 1;  //Выбирается всего 1-2 рекурсивных ссылки
+        max_length = 12;  //Максимальная длина слова ограничена
+        buffer_inc = 1; //Слова выбираются преимущественно из тех, которые содержат наиболее часто встречающиеся буквыы
+        help_count = (widget.size/2).ceil(); //По подсказке на каждое второе слово
         break;
       case 2: //Средний
-        pool_size = 3 * widget.size;
+        pool_size = (2.5 * widget.size).ceil();
         recursive_links = 3;
         max_length = 16;
-        buffer_inc = 2;
+        buffer_inc = 3;
+        help_count = 2 * (widget.size/2).ceil(); //По 2 подсказки на 5 слов
         break;
       case 3: //Высокий
-        pool_size = 2 * widget.size;
+        pool_size = 2 * widget.size;  //Меньший по размеру пул уменьшает вероятность выдачи легких слов
         recursive_links = 5;
         max_length = 20;
-        buffer_inc = 5;
+        buffer_inc = 5; //Вероятность выдачи слова, содержащего наименее часто используемые буквы возрастает наиболее сильно
+        help_count = (widget.size / 5).round(); //По подсказке на каждые 5 слов
         break;
     }
     pool = wiki.RequestPool(widget.pageid, pool_size, recursive_links, widget.lang_rus, max_length);
@@ -67,7 +71,7 @@ class CrosswordRouteState extends State<CrosswordRoute>
         } 
         else if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
         {
-          return CrosswordPage(words: snapshot.data!, size: widget.size, buf_inc: buffer_inc );
+          return CrosswordPage(words: snapshot.data!, size: widget.size, buf_inc: buffer_inc, help_count: help_count);
         }
         else if (snapshot.connectionState == ConnectionState.active)
         {
@@ -103,9 +107,9 @@ class CrosswordRouteState extends State<CrosswordRoute>
 }
 
 class CrosswordPage extends StatefulWidget {
-  const CrosswordPage({UniqueKey? key, required this.words, required this.size, required this.buf_inc}) : super(key: key);
+  const CrosswordPage({UniqueKey? key, required this.words, required this.size, required this.buf_inc, required this.help_count}) : super(key: key);
   final List <Gen_Word> words;
-  final int size, buf_inc;
+  final int size, buf_inc, help_count;
   @override
   State<CrosswordPage> createState() => CrosswordPageState();
 
@@ -120,12 +124,21 @@ class CrosswordPageState extends State<CrosswordPage> {
   List <Field_Word> Words = [];
   int chosen = 0;  //Выбранное слово
   int chosen_let = -1;  //Выбранная буква
-  int helper_count = 0;
+  int helper_used = 0;
+  int help_let_count = 0;
+  int help_err_count = 0;
+  int help_pic_count = 0;
+  int help_desc_count = 0;
+
   late Gen_Crossword crossword;
   @override
   void initState()
   {
     super.initState();
+    help_let_count = widget.help_count;
+    help_err_count = widget.help_count;
+    help_pic_count = widget.help_count;
+    help_desc_count = widget.help_count;
     crossword = Gen_Crossword(widget.words, widget.size, widget.buf_inc);
     Words = crossword.GetWordList();
   }
@@ -138,46 +151,71 @@ class CrosswordPageState extends State<CrosswordPage> {
         backgroundColor: ColorTheme.GetAppBarColor(context),
         leading: IconButton(  //Подведение итогов
           onPressed: () {
-            Navigator.popAndPushNamed(context, '/final', arguments: [helper_count, Words]);
+            Navigator.popAndPushNamed(context, '/final', arguments: [helper_used, Words]);
           },
           icon: Icon(Icons.close, color: ColorTheme.GetTextColor(context),),
         ),
         actions: [  //Подсказки
           IconButton(  //Вывод первого изображения из статьи
             onPressed: () {
-              if (Words[chosen].picture_url != '' && !Words[chosen].pic_showed)
+              if (Words[chosen].picture_url != '' && !Words[chosen].pic_showed && help_pic_count > 0)
               {
-                helper_count++;
+                setState(() {
+                  helper_used++;
+                  Words[chosen].pic_showed = true;
+                  help_pic_count--;
+                });
               }
               HelperShowPic(context);
             },
-            color: Words[chosen].picture_url == '' ? ColorTheme.GetUnavailHintColor(context)
+            color: (Words[chosen].picture_url == '' || (help_pic_count <= 0 && !Words[chosen].pic_showed)) ? ColorTheme.GetUnavailHintColor(context)
                  : (Words[chosen].pic_showed ? ColorTheme.GetUsedHintColor(context) : ColorTheme.GetAvailHintColor(context)),
-            icon: const Icon(Icons.photo),
+            tooltip: "Осталось $help_pic_count",
+            icon: const Icon(Icons.photo),                             
           ),
           IconButton(  //Расширение описания
             onPressed: () {
-              if (Words[chosen].ext_definition != '')
+              if (Words[chosen].ext_definition != '' && help_desc_count > 0)
               {
-                helper_count++;
-              }
-              HelperExtendDef();
+                setState(() {
+                  helper_used++;
+                  help_desc_count--;
+                  HelperExtendDef();
+                });
+              }     
             },
-            color: Words[chosen].ext_definition != '' ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
+            color: (Words[chosen].ext_definition != '' && help_desc_count > 0) ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
+            tooltip: "Осталось $help_desc_count",
             icon: const Icon(Icons.text_snippet),
           ),
           IconButton(  //Раскраска кроссворда - неправильные буквы будут помечены красным, пока не будут изменены
             onPressed: () {
-              HelperShowErrors();
+              if (help_err_count > 0)
+              {
+                setState(() {
+                  helper_used++;
+                  help_err_count--;
+                });
+                HelperShowErrors();
+              }   
             },
-            color: ColorTheme.GetAvailHintColor(context),
+            color: (help_err_count > 0) ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
+            tooltip: "Осталось $help_err_count",
             icon: const Icon(Icons.color_lens),
           ),
           IconButton(  //Вставка правильной буквы в рандомную пустую клетку
             onPressed: () {
-              HelperRandomLetters(3);
+              if (help_let_count > 0)
+              {
+                setState(() {
+                  help_let_count--;
+                  helper_used++;
+                });
+                HelperRandomLetters(3);
+              }
             },
-            color: ColorTheme.GetAvailHintColor(context),
+            color: (help_let_count > 0) ? ColorTheme.GetAvailHintColor(context) : ColorTheme.GetUnavailHintColor(context),
+            tooltip: "Осталось $help_let_count",
             icon: const Icon(Icons.font_download),
           ),
         ],
@@ -204,13 +242,10 @@ class CrosswordPageState extends State<CrosswordPage> {
 
   void HelperShowPic(BuildContext context)
   {  
-    if (Words[chosen].picture_url == '')
+    if (Words[chosen].picture_url == '' || (help_pic_count <= 0 && !Words[chosen].pic_showed))
     {
       return;
-    }
-    setState(() {
-      Words[chosen].pic_showed = true;
-    }); 
+    } 
     showDialog(
       barrierDismissible: true,
       context: context,
@@ -379,7 +414,7 @@ class CrosswordPageState extends State<CrosswordPage> {
     }); 
     if (checkForWin() == Words.length)  //Победа
     {
-      Navigator.popAndPushNamed(context, '/final', arguments: [helper_count, Words]);
+      Navigator.popAndPushNamed(context, '/final', arguments: [helper_used, Words]);
     }
   }
 

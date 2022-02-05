@@ -135,7 +135,7 @@ class _SearchTabState extends State<SearchTab> {
           }
           else
           {
-            result = CircularProgressIndicator(color: ColorTheme.GetLoadColor(context));
+            result = const SizedBox.shrink();
           }
           return Column(
             children: [
