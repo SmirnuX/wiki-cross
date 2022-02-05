@@ -72,7 +72,7 @@ class _GenRouteState extends State<GenRoute> {
               children: [
                 Icon(Icons.circle, color: ColorTheme.GetROCellColor(context), size: 100),
                 IconButton(
-                  onPressed: () {Navigator.pushNamed(context, '/crossword', arguments: GenSettings(widget.pageid, size, difficulty, widget.lang_rus));}, 
+                  onPressed: () {Navigator.popAndPushNamed(context, '/crossword', arguments: GenSettings(widget.pageid, size, difficulty, widget.lang_rus));}, 
                   iconSize: 80,
                   padding: const EdgeInsets.all(0) ,
                   alignment: Alignment.center,

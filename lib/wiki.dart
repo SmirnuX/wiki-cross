@@ -78,17 +78,19 @@ Stream<List <Gen_Word>> RequestPool(int pageid, int target, int recursive_target
       continue;
     }
   }
-  if (pool.length < target)
-  {
-    throw Error('Something went wrong ;( (Couldn\'t get words from this article).');
-  }
+  // if (pool.length < target)
+  // {
+  //   client.close();
+
+  //   throw Exception('Chosen articles don\' have enough words to build crossword.');
+  // }
   client.close();
 }
 
 Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, bool russian, int max_len) async  //Получить название и содержание статьи
 {
   String query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + 
-    '/w/api.php?format=json&action=query&prop=extracts&exchars=500&exintro&explaintext&redirects=1&pageids=' + pageid.toString();
+    '/w/api.php?format=json&origin=*&action=query&prop=extracts&exchars=500&exintro&explaintext&redirects=1&pageids=' + pageid.toString();
   var uri = Uri.parse(query);
   var response = await client.get(uri);
   if ((response).statusCode != 200)
@@ -112,7 +114,7 @@ Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, boo
   if (recursive)  //Поиск ссылок
   {
     String link_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос ссылок
-    '/w/api.php?action=query&format=json&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&indexpageids=true&inprop=url&pageids=' + pageid.toString();
+    '/w/api.php?action=query&format=json&origin=*&redirects&generator=links&gpllimit=500&gplnamespace=0&prop=info&indexpageids=true&inprop=url&pageids=' + pageid.toString();
     var links_map = {};
     do
     {
@@ -180,7 +182,7 @@ Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, boo
   print(full_desc);
   
   String pic_query = (russian ? 'https://ru.wikipedia.org' : 'https://en.wikipedia.org') + //Запрос изображения
-    '/w/api.php?action=query&format=json&prop=pageimages&pilimit=1&piprop=thumbnail&pithumbsize=600&pageids=' + pageid.toString();
+    '/w/api.php?action=query&format=json&origin=*&prop=pageimages&pilimit=1&piprop=thumbnail&pithumbsize=600&pageids=' + pageid.toString();
   uri = Uri.parse(pic_query);
   response = await client.get(uri);
   json_result = jsonDecode(response.body);
@@ -192,11 +194,8 @@ Future <WikiPage> GetArticle(http.Client client, int pageid, bool recursive, boo
   {
     picture = pic_result['thumbnail']['source'];
   }
-
   return WikiPage(title: new_title, content: short_desc, ext_content: full_desc, 
                   links: links, priority: priority, picture: picture);
-
-  
 }
 
 String CheckWord(String word, int max_len) //Проверка слова - оно не должно начинаться с цифр и не быть слишком длинным/коротким

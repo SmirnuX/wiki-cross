@@ -234,8 +234,8 @@ class _SearchTabState extends State<SearchTab> {
 Future <Map<String, int>> SearchWiki(String query, bool is_rus) async
 {
   Uri url = Uri.parse(is_rus
-                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json'
-                      :'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json');
+                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json&origin=*'
+                      :'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=10&srnamespace=0&format=json&origin=*');
   http.Response response = await http.get(url);
   if (response.statusCode != 200)
   {
@@ -262,8 +262,8 @@ Future <Map<String, int>> SearchWiki(String query, bool is_rus) async
 Future <Map<String, int>> SearchRandom(bool is_rus) async
 {
   Uri url = Uri.parse(is_rus
-                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=random&rnlimit=10&rnnamespace=0&format=json'
-                      :'https://en.wikipedia.org/w/api.php?action=query&list=random&rnlimit=10&rnnamespace=0&format=json');
+                      ?'https://ru.wikipedia.org/w/api.php?action=query&list=random&rnlimit=10&rnnamespace=0&format=json&origin=*'
+                      :'https://en.wikipedia.org/w/api.php?action=query&list=random&rnlimit=10&rnnamespace=0&format=json&origin=*');
   http.Response response = await http.get(url);
   if (response.statusCode != 200)
   {

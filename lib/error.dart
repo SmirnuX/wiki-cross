@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'main.dart';
 
 class ErrorRoute extends StatelessWidget {
   ErrorRoute({ Key? key, required this.error }) : super(key: key);
@@ -11,7 +12,7 @@ class ErrorRoute extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const Text('Ошибка', style: const TextStyle(fontSize: 25),),
+            const Text('Ошибка', style: TextStyle(fontSize: 25, color: ColorTheme.TextColor),),
             Stack(
               alignment: Alignment.center,
               children: const [
@@ -24,14 +25,15 @@ class ErrorRoute extends StatelessWidget {
             Stack(
               alignment: Alignment.center, 
               children: [
-                Icon(Icons.circle, color: Colors.blue[200], size: 100),
+                Icon(Icons.circle, color: ColorTheme.GetROCellColor(context), size: 100),
                 IconButton(
-                  onPressed: () {Navigator.pushNamed(context, '/');}, 
+                  onPressed: () {Navigator.popAndPushNamed(context, '/');}, 
                   iconSize: 60,
                   padding: const EdgeInsets.all(0) ,
                   alignment: Alignment.center,
-                  icon: const Icon (Icons.home, color: Colors.white)
+                  icon: Icon (Icons.home, color: ColorTheme.GetTextColor(context))
                 )   
+                 
               ],
             )  
 

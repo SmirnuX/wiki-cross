@@ -106,7 +106,7 @@ class FinalRoute extends StatelessWidget {
               children: [
                 Icon(Icons.circle, color: ColorTheme.GetROCellColor(context), size: 100),
                 IconButton(
-                  onPressed: () {Navigator.pushNamed(context, '/');}, 
+                  onPressed: () {Navigator.popAndPushNamed(context, '/');}, 
                   iconSize: 60,
                   padding: const EdgeInsets.all(0) ,
                   alignment: Alignment.center,

@@ -2,7 +2,7 @@
     package="com.example.wiki_cross">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="wiki_cross"
+        android:label="Wiki Cross"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

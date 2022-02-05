@@ -12,7 +12,7 @@ import 'dart:math';
 
 
 class CrosswordRoute extends StatefulWidget {
-  CrosswordRoute({Key? key, required this.pageid, required this.size, required this.diff, required this.lang_rus}) : super(key: key);
+  const CrosswordRoute({Key? key, required this.pageid, required this.size, required this.diff, required this.lang_rus}) : super(key: key);
   final int pageid;
   final bool lang_rus;
   final int size;
@@ -61,13 +61,13 @@ class CrosswordRouteState extends State<CrosswordRoute>
     return StreamBuilder(
       stream: pool,
       builder:(BuildContext context, AsyncSnapshot<List<Gen_Word>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
-        {
-          return CrosswordPage(words: snapshot.data!, size: widget.size, buf_inc: buffer_inc );
-        }
-        else if (snapshot.hasError)
+        if (snapshot.hasError)
         {
           return ErrorRoute(error: snapshot.error.toString());
+        } 
+        else if (snapshot.connectionState == ConnectionState.done) //Если поток завершен
+        {
+          return CrosswordPage(words: snapshot.data!, size: widget.size, buf_inc: buffer_inc );
         }
         else if (snapshot.connectionState == ConnectionState.active)
         {
@@ -138,7 +138,7 @@ class CrosswordPageState extends State<CrosswordPage> {
         backgroundColor: ColorTheme.GetAppBarColor(context),
         leading: IconButton(  //Подведение итогов
           onPressed: () {
-            Navigator.pushNamed(context, '/final', arguments: [helper_count, Words]);
+            Navigator.popAndPushNamed(context, '/final', arguments: [helper_count, Words]);
           },
           icon: Icon(Icons.close, color: ColorTheme.GetTextColor(context),),
         ),
@@ -379,7 +379,7 @@ class CrosswordPageState extends State<CrosswordPage> {
     }); 
     if (checkForWin() == Words.length)  //Победа
     {
-      Navigator.pushNamed(context, '/final', arguments: [helper_count, Words]);
+      Navigator.popAndPushNamed(context, '/final', arguments: [helper_count, Words]);
     }
   }
 
