@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:wiki_cross/crossgen.dart';
 import 'crossword.dart';
@@ -241,7 +242,7 @@ class CellFormatter extends TextInputFormatter {  //Форматирование
         }
         if (newValue.text.length <= 1)  //Если новая буква одна
         {
-          if (newValue.composing != TextRange.empty || Platform.isWindows)
+          if (newValue.composing != TextRange.empty || kIsWeb || Platform.isWindows)
           {
             if (!is_last)
             {

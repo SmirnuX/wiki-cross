@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'main.dart';
 
@@ -155,22 +156,27 @@ class _SearchTabState extends State<SearchTab> {
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   child:Row(
                     children: [
-                      Padding(
+                      Padding(  //Выбор языка
                         padding: const EdgeInsets.fromLTRB(16, 8, 2, 8),
                         child: IconButton(
                           splashRadius: 28,
-                          icon: Container(
-                            // alignment: Alignment.center,
-                            transform: Matrix4.diagonal3Values(0.7, 0.7, 0.7) + Matrix4.translationValues(1.6, 1.6, 1.6),
-                            child: Flag.fromCode(language_rus?FlagsCode.RU:FlagsCode.GB, borderRadius: 0.0, flagSize: FlagSize.size_1x1,),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                              border: Border.all(
-                                color: ColorTheme.GetTextColor(context),
-                                width: 2,
+                          icon: Padding(
+                            padding: const EdgeInsets.all(2),
+                            child: Container(
+                              alignment: Alignment.center,
+                              width: kIsWeb? 32 : (Platform.isAndroid ? 20 : 32),  //Подстраивание под размер MaterialIcon (16/20 -> 32/40 -> 28/36 (с вычетом обводки))
+                              height: kIsWeb? 32 : (Platform.isAndroid ? 20 : 32),
+                              child: Flag.fromCode(language_rus?FlagsCode.RU:FlagsCode.GB, borderRadius: 3.0, flagSize: FlagSize.size_1x1,),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.0),
+                                border: Border.all(
+                                  color: ColorTheme.GetTextColor(context),
+                                  width: 2,
+                                ),
                               ),
-                            ),
-                          ),     
+                            ), 
+                          ),
+    
                           onPressed: () {
                             setState(() {
                               language_rus = !language_rus;
