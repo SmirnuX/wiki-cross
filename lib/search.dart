@@ -23,40 +23,21 @@ class SearchRoute extends StatefulWidget //Страница поиска
 
 class _SearchRouteState extends State<SearchRoute> with SingleTickerProviderStateMixin
 {
-  late TabController tab_controller;
 
   @override
   void initState() {
     super.initState();
-    tab_controller = TabController(length: 2, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        bottom: TabBar  //Вкладки
-        (
-          indicatorColor: ColorTheme.GetTextColor(context),
-          controller: tab_controller,
-          tabs: [
-            Tab(
-              icon: Icon(Icons.search, color: ColorTheme.GetTextColor(context)),
-            ),
-            Tab(
-              icon: Icon(Icons.photo_size_select_actual_rounded, color: ColorTheme.GetTextColor(context)),
-            ),
-          ],
-        ),
+        title: Text('Wiki Crossword', style: TextStyle(color: ColorTheme.GetTextColor(context)),),
+        centerTitle: true,
         backgroundColor: ColorTheme.GetAppBarColor(context), 
       ),
-      body: TabBarView(
-        controller: tab_controller,
-        children:const [
-          SearchTab(),
-          Text('Темы')  //Темы
-        ]
-      ) 
+      body: const SearchTab(), 
     );
   }
 }

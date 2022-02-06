@@ -290,16 +290,17 @@ class CrosswordPageState extends State<CrosswordPage> {
           Words[chosen].mistakes.add(i);  //Добавляем ошибку
         }
       }
-      for (var inter in Words[chosen].inters)
+      for (var inter in Words[chosen].inters) //Проверка пересечений
       {
         if (inter.source == chosen &&
-            Words[chosen].word.substring(inter.source_index, inter.source_index+1) != ' ' &&
+            Words[chosen].in_word.substring(inter.source_index, inter.source_index+1) != '_' &&
             !Words[chosen].word.substring(inter.source_index, inter.source_index+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")) &&
             Words[chosen].word.substring(inter.source_index, inter.source_index+1) != Words[chosen].in_word.substring(inter.source_index, inter.source_index+1))
         {
           Words[inter.word].mistakes.add(inter.word_index);
         }
-        else if (Words[chosen].word.substring(inter.word_index, inter.word_index+1) != ' ' &&
+        else if (inter.word == chosen &&
+                Words[chosen].in_word.substring(inter.word_index, inter.word_index+1) != '_' &&
                 !Words[chosen].word.substring(inter.word_index, inter.word_index+1).contains(RegExp(r"[^a-zA-Zа-яА-ЯёЁ]")) &&
                 Words[chosen].word.substring(inter.word_index, inter.word_index+1) != Words[chosen].in_word.substring(inter.word_index, inter.word_index+1))
         {
