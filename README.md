@@ -1,18 +1,19 @@
-# wiki_cross
+# Wiki Crossword
 
-A new Flutter project.
 
-## Getting Started
+ <img src="pictures/screenshot.png" alt="Screenshot of Wiki Cross" width="400"/>
 
-This project is a starting point for a Flutter application.
+ This is game, inspired by [WikiCros](https://wikicros.blogspot.com/). It creates crossword from chosen Wikipedia article (namely, articles are selected, links to which are found on chosen page, and this process repeats recursively).
 
-A few resources to get you started if this is your first Flutter project:
+## Features
+ - Poor optimization
+ - Dark theme
+ - English and russian localizations
+ - Four types of hints
+ - Difficulty selection (higher the difficulty - lesser hints and more difficult words)
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-https://wikicros.blogspot.com/
+## Types of hints
+ - Show first picture from article (can be unaccesible for some pages)
+ - Show extended definition (can be unaccesible for some pages)
+ - Highlight wrong letters in chosen word
+ - Put three letters in chosen word (priority is given to empty cells, then to wrong letters)
